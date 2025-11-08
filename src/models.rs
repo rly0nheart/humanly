@@ -2,7 +2,6 @@ use std::time::{Duration, SystemTime};
 
 pub struct HumanCount;
 
-
 impl HumanCount {
     pub fn from(number: u64) -> String {
         let format_val = |val: f64, suffix: &str| {
@@ -71,7 +70,9 @@ impl HumanDuration {
     pub fn from(system_time: Option<SystemTime>) -> String {
         let now = SystemTime::now();
         if let Some(system_time) = system_time {
-            let elapsed = now.duration_since(system_time).unwrap_or_else(|_| Duration::ZERO);
+            let elapsed = now
+                .duration_since(system_time)
+                .unwrap_or_else(|_| Duration::ZERO);
             let secs = elapsed.as_secs();
 
             if secs < 10 {
@@ -137,7 +138,6 @@ impl HumanPermissions {
 
         #[cfg(windows)]
         {
-            // Convert the same bits to Windows-style descriptive text
             let user_read = mode & 0o400 != 0;
             let user_write = mode & 0o200 != 0;
             let user_execute = mode & 0o100 != 0;
@@ -152,10 +152,18 @@ impl HumanPermissions {
 
             let to_text = |r: bool, w: bool, x: bool| {
                 let mut perms = Vec::new();
-                if r { perms.push("Read"); }
-                if w { perms.push("Write"); }
-                if x { perms.push("Execute"); }
-                if perms.is_empty() { perms.push("None"); }
+                if r {
+                    perms.push("Read");
+                }
+                if w {
+                    perms.push("Write");
+                }
+                if x {
+                    perms.push("Execute");
+                }
+                if perms.is_empty() {
+                    perms.push("None");
+                }
                 perms.join(", ")
             };
 
