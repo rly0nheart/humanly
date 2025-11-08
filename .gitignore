@@ -1,0 +1,15 @@
+# Target folder (build artifacts)
+target/
+
+# Cargo package files
+**/*.rs.bk
+*.rs~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
