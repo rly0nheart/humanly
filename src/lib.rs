@@ -44,7 +44,7 @@
 //! );
 //! ```
 //!
-//! ## Aspirations
+//! ## Goals
 //!
 //! - Provide a simple, consistent API to make numeric and system values readable.
 //! - Cross-platform support for permissions (Unix and Windows).
