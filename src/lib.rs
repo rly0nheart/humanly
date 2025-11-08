@@ -1,9 +1,10 @@
 mod models;
 pub use models::HumanCount;
-pub use models::HumanSize;
-pub use models::HumanTime;
 pub use models::HumanDuration;
 pub use models::HumanPercent;
+pub use models::HumanPermissions;
+pub use models::HumanSize;
+pub use models::HumanTime;
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
@@ -11,7 +12,7 @@ pub fn add(left: u64, right: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::models::{HumanCount, HumanDuration, HumanPercent, HumanSize, HumanTime};
+    use crate::models::{HumanCount, HumanDuration, HumanPercent, HumanPermissions, HumanSize, HumanTime};
     use std::time::{Duration, SystemTime};
 
     #[test]
@@ -30,7 +31,7 @@ mod tests {
         assert_eq!(HumanSize::from(500), "500 B");
         assert_eq!(HumanSize::from(1024), "1 KiB");
         assert_eq!(HumanSize::from(1_048_576), "1 MiB");
-        assert_eq!(HumanSize::from(1_500_000), "1.4 MiB"); // 1_500_000 / 1024^2 ≈ 1.430 MiB -> rounds to 1.4
+        assert_eq!(HumanSize::from(1_500_000), "1.4 MiB");
         assert_eq!(HumanSize::from(1_073_741_824), "1 GiB");
     }
 
@@ -41,10 +42,10 @@ mod tests {
         assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(45))), "45s ago");
         assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(120))), "2m ago");
         assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(7200))), "2h ago");
-        assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(172_800))), "2d ago"); // 2 days
-        assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(1_209_600))), "2wk ago"); // 2 weeks
-        assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(5_259_492))), "2mo ago"); // ~2 months
-        assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(63_113_904))), "2yr ago"); // ~2 years
+        assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(172_800))), "2d ago");
+        assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(1_209_600))), "2wk ago");
+        assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(5_259_492))), "2mo ago");
+        assert_eq!(HumanDuration::from(Some(now - Duration::from_secs(63_113_904))), "2yr ago");
     }
 
     #[test]
@@ -60,6 +61,33 @@ mod tests {
         assert_eq!(HumanPercent::from(12.3456, 1), "12.3%");
         assert_eq!(HumanPercent::from(12.3456, 2), "12.35%");
         assert_eq!(HumanPercent::from(0.1234 * 100.0, 1), "12.3%");
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn test_unix_permissions() {
+        assert_eq!(HumanPermissions::from(0o40755), "drwxr-xr-x");
+        assert_eq!(HumanPermissions::from(0o100644), "-rw-r--r--");
+        assert_eq!(HumanPermissions::from(0o100755), "-rwxr-xr-x");
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn test_windows_permissions() {
+        assert_eq!(
+            HumanPermissions::from(0o40755),
+            "User: Read, Write, Execute; Group: Read, Execute; Other: Read, Execute"
+        );
+
+        assert_eq!(
+            HumanPermissions::from(0o100644);,
+            "User: Read, Write; Group: Read; Other: Read"
+        );
+
+        assert_eq!(
+            HumanPermissions::from(0o100755),
+            "User: Read, Write, Execute; Group: Read, Execute; Other: Read, Execute"
+        );
     }
 }
 
