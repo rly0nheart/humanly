@@ -132,8 +132,7 @@ impl HumanPermissions {
     pub fn from(mode: u32) -> String {
         #[cfg(unix)]
         {
-            let unix_mode = unix_mode::to_string(mode);
-            unix_mode.to_string()
+            unix_mode::to_string(mode)
         }
 
         #[cfg(windows)]
