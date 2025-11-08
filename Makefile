@@ -19,16 +19,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Ansi colours
-RED    := \\033[1;31m
-GREEN  := \\033[1;32m
-YELLOW := \\033[1;33m
-RESET  := \\033[0m
-
-BINARY_NAME := ce
-INSTALL_PATH := ~/.cargo/bin/$(BINARY_NAME)
-SETUP_SCRIPT := scripts/install-libmagic.sh
-
 # Default target
 default: build
 
@@ -55,11 +45,6 @@ lint:
 # Run tests
 test:
 	@cargo test
-
-# Install the binary globally
-install:
-	@cargo install --path . --force
-	@echo -e "   $(GREEN)Installed$(RESET) $(BINARY_NAME) to $(INSTALL_PATH)"
 
 # Rebuild from scratch
 rebuild: clean build
