@@ -1,10 +1,28 @@
+use std::fmt;
 use std::time::{Duration, SystemTime};
 
 #[derive(Clone, Copy)]
-enum OutputFormat {
+enum HumanFormat {
     Concise,
     Full,
 }
+
+macro_rules! human_display {
+    ($t:ty) => {
+        impl fmt::Display for $t {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "{}", self.full())
+            }
+        }
+    };
+}
+
+human_display!(HumanCount);
+human_display!(HumanSize);
+human_display!(HumanDuration);
+human_display!(HumanTime);
+human_display!(HumanPercent);
+
 
 pub struct HumanCount {
     number: u64,
@@ -16,45 +34,46 @@ impl HumanCount {
     }
 
     pub fn concise(&self) -> String {
-        self.format(OutputFormat::Concise)
+        self.format(HumanFormat::Concise)
     }
 
-    pub fn full(&self) -> String {
-        self.format(OutputFormat::Full)
+    fn full(&self) -> String {
+        self.format(HumanFormat::Full)
     }
 
-    fn format(&self, format: OutputFormat) -> String {
-        let number = self.number;
-        let format_val = |val: f64, concise_suffix: &str, full_suffix: &str| {
-            let rounded = (val * 10.0).round() / 10.0;
-            let formatted = if rounded.fract() == 0.0 {
-                format!("{}", rounded as u64)
-            } else {
-                format!("{:.1}", rounded)
-            };
-            match format {
-                OutputFormat::Concise => format!("{}{}", formatted, concise_suffix),
-                OutputFormat::Full => format!("{} {}", formatted, full_suffix),
+    fn format(&self, format: HumanFormat) -> String {
+        let number = self.number as f64; // convert once to f64
+
+        let units = [
+            (1_000_000_000_000_000_000.0, "Qi", "quintillion"),
+            (1_000_000_000_000_000.0, "Q", "quadrillion"),
+            (1_000_000_000_000.0, "T", "trillion"),
+            (1_000_000_000.0, "B", "billion"),
+            (1_000_000.0, "M", "million"),
+            (1_000.0, "K", "thousand"),
+        ];
+
+        for (divisor, concise_suffix, full_suffix) in units {
+            if number >= divisor {
+                let val = number / divisor;
+                let rounded = (val * 10.0).floor() / 10.0; // floor prevents overflow to next unit
+                return match format {
+                    HumanFormat::Concise => {
+                        if rounded.fract() == 0.0 {
+                            format!("{}{}", rounded as u64, concise_suffix)
+                        } else {
+                            format!("{:.1}{}", rounded, concise_suffix)
+                        }
+                    }
+                    HumanFormat::Full => {
+                        if rounded.fract() == 0.0 {
+                            format!("{} {}", rounded as u64, full_suffix)
+                        } else {
+                            format!("{:.1} {}", rounded, full_suffix)
+                        }
+                    }
+                };
             }
-        };
-
-        if number >= 1_000_000_000_000_000_000 {
-            return format_val(number as f64 / 1e18, "Qi", "quintillion");
-        }
-        if number >= 1_000_000_000_000_000 {
-            return format_val(number as f64 / 1e15, "Q", "quadrillion");
-        }
-        if number >= 1_000_000_000_000 {
-            return format_val(number as f64 / 1e12, "T", "trillion");
-        }
-        if number >= 1_000_000_000 {
-            return format_val(number as f64 / 1e9, "B", "billion");
-        }
-        if number >= 1_000_000 {
-            return format_val(number as f64 / 1e6, "M", "million");
-        }
-        if number >= 1_000 {
-            return format_val(number as f64 / 1e3, "K", "thousand");
         }
 
         number.to_string()
@@ -73,14 +92,14 @@ impl HumanSize {
     }
 
     pub fn concise(&self) -> String {
-        self.format(OutputFormat::Concise)
+        self.format(HumanFormat::Concise)
     }
     
-    pub fn full(&self) -> String {
-        self.format(OutputFormat::Full)
+    fn full(&self) -> String {
+        self.format(HumanFormat::Full)
     }
 
-    fn format(&self, format: OutputFormat) -> String {
+    fn format(&self, format: HumanFormat) -> String {
         let concise_units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
         let full_units = [
             "bytes",
@@ -109,10 +128,10 @@ impl HumanSize {
         };
 
         match format {
-            OutputFormat::Concise => format!("{} {}", formatted, concise_units[idx]),
-            OutputFormat::Full => {
+            HumanFormat::Concise => format!("{} {}", formatted, concise_units[idx]),
+            HumanFormat::Full => {
                 let unit = full_units[idx];
-                if formatted == "1" && unit.ends_with('s') {
+                if rounded == 1.0 && unit.ends_with('s') {
                     format!("{} {}", formatted, &unit[..unit.len() - 1])
                 } else {
                     format!("{} {}", formatted, unit)
@@ -134,42 +153,65 @@ impl HumanDuration {
     }
 
     pub fn concise(&self) -> String {
-        self.format(OutputFormat::Concise)
+        self.format(HumanFormat::Concise)
     }
 
-    pub fn full(&self) -> String {
-        self.format(OutputFormat::Full)
+    fn full(&self) -> String {
+        self.format(HumanFormat::Full)
     }
 
-    fn format(&self, format: OutputFormat) -> String {
+    fn format(&self, format: HumanFormat) -> String {
         let now = SystemTime::now();
         if let Some(st) = self.system_time {
-            let elapsed = now.duration_since(st).unwrap_or_else(|_| Duration::ZERO);
-            let secs = elapsed.as_secs();
+            let elapsed = match now.duration_since(st) {
+                Ok(dur) => dur.as_secs() as i64,
+                Err(err) => -(err.duration().as_secs() as i64),
+            };
 
-            if secs < 10 {
+            if elapsed.abs() < 1 {
                 return "just now".to_string();
             }
 
-            let (count, concise_suffix, singular, plural) = if secs < 60 {
-                (secs, "s ago", "second", "seconds")
-            } else if secs < 3600 {
-                (secs / 60, "m ago", "minute", "minutes")
-            } else if secs < 86_400 {
-                (secs / 3600, "h ago", "hour", "hours")
-            } else if secs < 604_800 {
-                (secs / 86_400, "d ago", "day", "days")
-            } else if secs < 2_629_746 {
-                (secs / 604_800, "wk ago", "week", "weeks")
-            } else if secs < 31_556_952 {
-                (secs / 2_629_746, "mo ago", "month", "months")
+            let (count, concise_suffix, singular, plural) = if elapsed < 0 {
+                // future
+                let secs = -elapsed as u64;
+                if secs < 60 {
+                    (secs, "s from now", "second", "seconds")
+                } else if secs < 3600 {
+                    (secs / 60, "m from now", "minute", "minutes")
+                } else if secs < 86_400 {
+                    (secs / 3600, "h from now", "hour", "hours")
+                } else if secs < 604_800 {
+                    (secs / 86_400, "d from now", "day", "days")
+                } else if secs < 2_592_000 {
+                    (secs / 604_800, "wk from now", "week", "weeks")
+                } else if secs < 31_536_000 {
+                    (secs / 2_592_000, "mo from now", "month", "months")
+                } else {
+                    (secs / 31_536_000, "yr from now", "year", "years")
+                }
             } else {
-                (secs / 31_556_952, "yr ago", "year", "years")
+                let secs = elapsed as u64;
+                if secs < 60 {
+                    (secs, "s ago", "second", "seconds")
+                } else if secs < 3600 {
+                    (secs / 60, "m ago", "minute", "minutes")
+                } else if secs < 86_400 {
+                    (secs / 3600, "h ago", "hour", "hours")
+                } else if secs < 604_800 {
+                    (secs / 86_400, "d ago", "day", "days")
+                } else if secs < 2_592_000 {
+                    (secs / 604_800, "wk ago", "week", "weeks")
+                } else if secs < 31_536_000 {
+                    (secs / 2_592_000, "mo ago", "month", "months")
+                } else {
+                    (secs / 31_536_000, "yr ago", "year", "years")
+                }
             };
 
             match format {
-                OutputFormat::Concise => format!("{}{}", count, concise_suffix),
-                OutputFormat::Full => {
+                HumanFormat::Concise => format!("{}{}", count, concise_suffix),
+                HumanFormat::Full => {
                     if count == 1 {
                         format!("1 {} ago", singular)
                     } else {
@@ -195,30 +237,34 @@ impl HumanTime {
     }
 
     pub fn concise(&self) -> String {
-        self.format(OutputFormat::Concise)
+        self.format(HumanFormat::Concise)
     }
     
-    pub fn full(&self) -> String {
-        self.format(OutputFormat::Full)
+    fn full(&self) -> String {
+        self.format(HumanFormat::Full)
     }
 
-    fn format(&self, format: OutputFormat) -> String {
+    fn format(&self, format: HumanFormat) -> String {
         let secs = self.duration.as_secs();
         let hours = secs / 3600;
         let minutes = (secs % 3600) / 60;
         let seconds = secs % 60;
 
         match format {
-            OutputFormat::Concise => {
+            HumanFormat::Concise => {
+                let mut parts = Vec::new();
                 if hours > 0 {
-                    format!("{}h {}m {}s", hours, minutes, seconds)
-                } else if minutes > 0 {
-                    format!("{}m {}s", minutes, seconds)
-                } else {
-                    format!("{}s", seconds)
+                    parts.push(format!("{}h", hours));
                 }
+                if minutes > 0 || hours > 0 {
+                    parts.push(format!("{}m", minutes));
+                }
+                if seconds > 0 || parts.is_empty() {
+                    parts.push(format!("{}s", seconds));
+                }
+                parts.join(" ")
             }
-            OutputFormat::Full => {
+            HumanFormat::Full => {
                 let mut parts = Vec::new();
                 if hours > 0 {
                     parts.push(format!(
@@ -260,20 +306,24 @@ impl HumanPercent {
     }
 
     pub fn concise(&self) -> String {
-        self.format(OutputFormat::Concise)
+        self.format(HumanFormat::Concise)
     }
 
-    pub fn full(&self) -> String {
-        self.format(OutputFormat::Full)
+    fn full(&self) -> String {
+        self.format(HumanFormat::Full)
     }
 
-    fn format(&self, format: OutputFormat) -> String {
+    fn format(&self, format: HumanFormat) -> String {
         let multiplier = 10_f64.powi(self.decimals as i32);
         let rounded = (self.value * multiplier).round() / multiplier;
 
-        match format {
-            OutputFormat::Concise => format!("{}%", rounded),
-            OutputFormat::Full => format!("{} percent", rounded),
+        if !rounded.is_finite() {
+            return "-".to_string();
         }
+        match format {
+            HumanFormat::Concise => format!("{}%", rounded),
+            HumanFormat::Full => format!("{} percent", rounded),
+        }
+
     }
 }

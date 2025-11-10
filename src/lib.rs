@@ -9,14 +9,21 @@
 //! - [`HumanDuration`]: Show elapsed time since a timestamp in human-readable format
 //! - [`HumanTime`]: Format a `Duration` as H:M:S
 //! - [`HumanPercent`]: Round and format floating-point numbers as percentages
-//! - [`HumanPermissions`]: Show Unix or Windows-style permissions from mode bits
 //!
 //! ## Output formats
 //!
-//! Each type provides three formatting methods for flexibility:
+//! Each type provides `.concise()`, a formatting method that returns a concise version of the output:
+//! ```rust
+//! use humaniser::HumanCount;
 //!
-//! - `.concise()` — returns a short, compact format (e.g., `"1.2K"`, `"5 MiB"`, `"3h 12m 5s"`, `"12.3%"`, `"3d ago"`).
-//! - `.full()` — returns a descriptive, fully written-out format (e.g., `"1.2 thousand"`, `"5 mebibytes"`, `"3 hours 12 minutes 5 seconds"`, `"12.3 percent"`, `"3 days ago"`).
+//! fn main() {
+//! // This will print "1.8 thousand"
+//! println!("{}", HumanCount::from(1_200).to_string());
+//!
+//! // This will print "1.8K"
+//! println!("{}", HumanCount::from(1_200).concise());
+//! }
+//! ```
 //!
 //! ## Examples
 //!
@@ -25,11 +32,11 @@
 //!
 //! // HumanCount
 //! assert_eq!(HumanCount::from(1_200).concise(), "1.2K");
-//! assert_eq!(HumanCount::from(1_200).full(), "1.2 thousand");
+//! assert_eq!(HumanCount::from(1_200).to_string(), "1.2 thousand");
 //!
 //! // HumanSize
 //! assert_eq!(HumanSize::from(5_242_880).concise(), "5 MiB");
-//! assert_eq!(HumanSize::from(5_242_880).full(), "5 mebibytes");
+//! assert_eq!(HumanSize::from(5_242_880).to_string(), "5 mebibytes");
 //!
 //! // HumanDuration
 //! use std::time::{Duration, SystemTime};
@@ -39,11 +46,11 @@
 //!
 //! // HumanTime
 //! assert_eq!(HumanTime::from(Duration::from_secs(3661)).concise(), "1h 1m 1s");
-//! assert_eq!(HumanTime::from(Duration::from_secs(3661)).full(), "1 hour 1 minute 1 second");
+//! assert_eq!(HumanTime::from(Duration::from_secs(3661)).to_string(), "1 hour 1 minute 1 second");
 //!
 //! // HumanPercent
 //! assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
-//! assert_eq!(HumanPercent::from(12.3456, 1).full(), "12.3 percent");
+//! assert_eq!(HumanPercent::from(12.3456, 1).to_string(), "12.3 percent");
 //! ```
 //!
 //! ## Goals
@@ -64,14 +71,12 @@
 //! - [`HumanDuration`] — Show how long ago a timestamp occurred in short or long format.
 //! - [`HumanTime`] — Convert `Duration` into H:M:S strings.
 //! - [`HumanPercent`] — Round floats and display as percentage string.
-//! - [`HumanPermissions`] — Convert numeric mode to readable permissions string.
 //!
 //! [`HumanCount`]: struct.HumanCount.html
 //! [`HumanSize`]: struct.HumanSize.html
 //! [`HumanDuration`]: struct.HumanDuration.html
 //! [`HumanTime`]: struct.HumanTime.html
 //! [`HumanPercent`]: struct.HumanPercent.html
-//! [`HumanPermissions`]: struct.HumanPermissions.html
 
 mod human;
 pub use human::HumanCount;
@@ -93,29 +98,30 @@ mod tests {
 
     #[test]
     fn test_human_count() {
-        assert_eq!(HumanCount::from(500).full(), "500");
+        assert_eq!(HumanCount::from(1_700_700).to_string(), "1.7 million");
+        assert_eq!(HumanCount::from(500).to_string(), "500");
         assert_eq!(HumanCount::from(1_000).concise(), "1K");
-        assert_eq!(HumanCount::from(1_500).full(), "1.5 thousand");
-        assert_eq!(HumanCount::from(1_000_000).full(), "1 million");
+        assert_eq!(HumanCount::from(1_500).to_string(), "1.5 thousand");
+        assert_eq!(HumanCount::from(1_000_000).to_string(), "1 million");
         assert_eq!(HumanCount::from(1_500_000).concise(), "1.5M");
         assert_eq!(HumanCount::from(1_000_000_000).concise(), "1B");
-        assert_eq!(HumanCount::from(1_500_000_000).full(), "1.5 billion");
+        assert_eq!(HumanCount::from(1_500_000_000).to_string(), "1.5 billion");
     }
 
     #[test]
     fn test_human_size() {
         assert_eq!(HumanSize::from(500).concise(), "500 B");
-        assert_eq!(HumanSize::from(1024).full(), "1 kibibyte");
-        assert_eq!(HumanSize::from(1_048_576).full(), "1 mebibyte");
+        assert_eq!(HumanSize::from(1024).to_string(), "1 kibibyte");
+        assert_eq!(HumanSize::from(1_048_576).to_string(), "1 mebibyte");
         assert_eq!(HumanSize::from(1_500_000).concise(), "1.4 MiB");
-        assert_eq!(HumanSize::from(1_073_741_824).full(), "1 gibibyte");
+        assert_eq!(HumanSize::from(1_073_741_824).to_string(), "1 gibibyte");
     }
 
     #[test]
     fn test_human_time() {
         let now = SystemTime::now();
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(5))).full(),
+            HumanDuration::from(Some(now - Duration::from_secs(0))).to_string(),
             "just now"
         );
         assert_eq!(
@@ -123,11 +129,11 @@ mod tests {
             "45s ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(120))).full(),
+            HumanDuration::from(Some(now - Duration::from_secs(120))).to_string(),
             "2 minutes ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(7200))).full(),
+            HumanDuration::from(Some(now - Duration::from_secs(7200))).to_string(),
             "2 hours ago"
         );
         assert_eq!(
@@ -139,7 +145,7 @@ mod tests {
             "2wk ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(5_259_492))).full(),
+            HumanDuration::from(Some(now - Duration::from_secs(5_259_492))).to_string(),
             "2 months ago"
         );
         assert_eq!(
@@ -153,7 +159,7 @@ mod tests {
         assert_eq!(HumanTime::from(Duration::from_secs(45)).concise(), "45s");
         assert_eq!(HumanTime::from(Duration::from_secs(90)).concise(), "1m 30s");
         assert_eq!(
-            HumanTime::from(Duration::from_secs(3672)).full(),
+            HumanTime::from(Duration::from_secs(3672)).to_string(),
             "1 hour 1 minute 12 seconds"
         );
     }
@@ -162,7 +168,7 @@ mod tests {
     fn test_human_percent() {
         assert_eq!(HumanPercent::from(12.3456, 0).concise(), "12%");
         assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
-        assert_eq!(HumanPercent::from(12.3456, 2).full(), "12.35 percent");
-        assert_eq!(HumanPercent::from(0.1234 * 100.0, 1).full(), "12.3 percent");
+        assert_eq!(HumanPercent::from(12.3456, 2).to_string(), "12.35 percent");
+        assert_eq!(HumanPercent::from(0.1234 * 100.0, 1).to_string(), "12.3 percent");
     }
 }
