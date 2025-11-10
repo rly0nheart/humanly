@@ -44,17 +44,6 @@
 //! // HumanPercent
 //! assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
 //! assert_eq!(HumanPercent::from(12.3456, 1).full(), "12.3 percent");
-//!
-//! // HumanPermissions (Unix example)
-//! #[cfg(unix)]
-//! assert_eq!(HumanPermissions::from(0o40755), "drwxr-xr-x");
-//!
-//! // HumanPermissions (Windows-style)
-//! #[cfg(windows)]
-//! assert_eq!(
-//!     HumanPermissions::from(0o40755),
-//!     "User: Read, Write, Execute; Group: Read, Execute; Other: Read, Execute"
-//! );
 //! ```
 //!
 //! ## Goals
@@ -88,7 +77,6 @@ mod human;
 pub use human::HumanCount;
 pub use human::HumanDuration;
 pub use human::HumanPercent;
-pub use human::HumanPermissions;
 pub use human::HumanSize;
 pub use human::HumanTime;
 
@@ -99,7 +87,7 @@ pub fn add(left: u64, right: u64) -> u64 {
 #[cfg(test)]
 mod tests {
     use crate::human::{
-        HumanCount, HumanDuration, HumanPercent, HumanPermissions, HumanSize, HumanTime,
+        HumanCount, HumanDuration, HumanPercent, HumanSize, HumanTime,
     };
     use std::time::{Duration, SystemTime};
 
@@ -176,32 +164,5 @@ mod tests {
         assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
         assert_eq!(HumanPercent::from(12.3456, 2).full(), "12.35 percent");
         assert_eq!(HumanPercent::from(0.1234 * 100.0, 1).full(), "12.3 percent");
-    }
-
-    #[test]
-    #[cfg(unix)]
-    fn test_unix_permissions() {
-        assert_eq!(HumanPermissions::from(0o40755), "drwxr-xr-x");
-        assert_eq!(HumanPermissions::from(0o100644), "-rw-r--r--");
-        assert_eq!(HumanPermissions::from(0o100755), "-rwxr-xr-x");
-    }
-
-    #[test]
-    #[cfg(windows)]
-    fn test_windows_permissions() {
-        assert_eq!(
-            HumanPermissions::from(0o40755),
-            "User: Read, Write, Execute; Group: Read, Execute; Other: Read, Execute"
-        );
-
-        assert_eq!(
-            HumanPermissions::from(0o100644);,
-            "User: Read, Write; Group: Read; Other: Read"
-        );
-
-        assert_eq!(
-            HumanPermissions::from(0o100755),
-            "User: Read, Write, Execute; Group: Read, Execute; Other: Read, Execute"
-        );
     }
 }
