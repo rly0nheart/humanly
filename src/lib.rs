@@ -18,10 +18,10 @@
 //!
 //! fn main() {
 //! // This will print "1.8 thousand"
-//! println!("{}", HumanCount::from(1_200).to_string());
+//! println!("{}", HumanCount::from(1_800).to_string());
 //!
 //! // This will print "1.8K"
-//! println!("{}", HumanCount::from(1_200).concise());
+//! println!("{}", HumanCount::from(1_800).concise());
 //! }
 //! ```
 //!
