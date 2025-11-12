@@ -210,9 +210,15 @@ impl HumanDuration {
             };
 
             match format {
-                HumanFormat::Concise => format!("{}{}", count, concise_suffix),
+                HumanFormat::Concise => {
+                    format!("{}{}", count, concise_suffix)
+                }
                 HumanFormat::Full => {
-                    if count == 1 {
+                    if count == 1 && singular == "day" && elapsed >= 0 {
+                        "yesterday".to_string()
+                    } else if count == 1 && singular == "day" && elapsed < 0 {
+                        "tomorrow".to_string()
+                    } else if count == 1 {
                         format!("1 {} ago", singular)
                     } else {
                         format!("{} {} ago", count, plural)

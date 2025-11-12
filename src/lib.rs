@@ -152,6 +152,10 @@ mod tests {
             HumanDuration::from(Some(now - Duration::from_secs(63_113_904))).concise(),
             "2yr ago"
         );
+        assert_eq!(
+            HumanDuration::from(Some(now - Duration::from_secs(86_400))).to_string(),
+            "yesterday"
+        );
     }
 
     #[test]
