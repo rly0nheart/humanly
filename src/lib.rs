@@ -78,12 +78,12 @@
 //! [`HumanTime`]: struct.HumanTime.html
 //! [`HumanPercent`]: struct.HumanPercent.html
 
-mod human;
-pub use human::HumanCount;
-pub use human::HumanDuration;
-pub use human::HumanPercent;
-pub use human::HumanSize;
-pub use human::HumanTime;
+mod core;
+pub use core::HumanCount;
+pub use core::HumanDuration;
+pub use core::HumanPercent;
+pub use core::HumanSize;
+pub use core::HumanTime;
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
@@ -91,7 +91,7 @@ pub fn add(left: u64, right: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::human::{
+    use crate::core::{
         HumanCount, HumanDuration, HumanPercent, HumanSize, HumanTime,
     };
     use std::time::{Duration, SystemTime};
@@ -142,7 +142,7 @@ mod tests {
         );
         assert_eq!(
             HumanDuration::from(Some(now - Duration::from_secs(1_209_600))).concise(),
-            "2wk ago"
+            "2w ago"
         );
         assert_eq!(
             HumanDuration::from(Some(now - Duration::from_secs(5_259_492))).to_string(),
@@ -150,7 +150,7 @@ mod tests {
         );
         assert_eq!(
             HumanDuration::from(Some(now - Duration::from_secs(63_113_904))).concise(),
-            "2yr ago"
+            "2y ago"
         );
         assert_eq!(
             HumanDuration::from(Some(now - Duration::from_secs(86_400))).to_string(),

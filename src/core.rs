@@ -201,11 +201,11 @@ impl HumanDuration {
                 } else if secs < 604_800 {
                     (secs / 86_400, "d ago", "day", "days")
                 } else if secs < 2_592_000 {
-                    (secs / 604_800, "wk ago", "week", "weeks")
+                    (secs / 604_800, "w ago", "week", "weeks")
                 } else if secs < 31_536_000 {
                     (secs / 2_592_000, "mo ago", "month", "months")
                 } else {
-                    (secs / 31_536_000, "yr ago", "year", "years")
+                    (secs / 31_536_000, "y ago", "year", "years")
                 }
             };
 
