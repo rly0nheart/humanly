@@ -83,7 +83,7 @@ impl HumanCount {
 /* -------------------- HumanSize -------------------- */
 
 #[derive(Clone, Copy, Debug)]
-pub enum UnitSystem {
+enum UnitSystem {
     Binary,  // IEC, 1024-based
     Decimal, // SI, 1000-based
 }
@@ -99,8 +99,14 @@ impl HumanSize {
         Self { bytes, system: UnitSystem::Binary }
     }
 
-    pub fn from_with_system(bytes: u64, system: UnitSystem) -> Self {
-        Self { bytes, system }
+    pub fn decimal(mut self) -> Self {
+        self.system = UnitSystem::Decimal;
+        self
+    }
+
+    pub fn binary(mut self) -> Self {
+        self.system = UnitSystem::Binary;
+        self
     }
 
     pub fn concise(&self) -> String {
@@ -145,11 +151,8 @@ impl HumanSize {
             HumanFormat::Concise => format!("{} {}", formatted, units_short[idx]),
             HumanFormat::Full => {
                 let unit = units_full[idx];
-                if rounded == 1.0 && unit.ends_with('s') {
-                    format!("{} {}", formatted, &unit[..unit.len() - 1])
-                } else {
-                    format!("{} {}", formatted, unit)
-                }
+                let pluralized = if rounded == 1.0 { unit.to_string() } else { format!("{}s", unit) };
+                format!("{} {}", formatted, pluralized)
             }
         }
     }

@@ -13,49 +13,43 @@
 //! ## Output formats
 //!
 //! Each type provides `.concise()`, a formatting method that returns a concise version of the output:
+//!
 //! ```rust
 //! use humaniser::HumanCount;
 //!
-//! fn main() {
 //! // This will print "1.8 thousand"
 //! println!("{}", HumanCount::from(1_800).to_string());
 //!
 //! // This will print "1.8K"
 //! println!("{}", HumanCount::from(1_800).concise());
-//! }
 //! ```
 //!
 //! ## Examples
 //!
 //! ```rust
-//! use humaniser::*;
+//! use humaniser::{HumanCount, HumanSize, HumanDuration, HumanTime, HumanPercent};
+//! use std::time::{Duration, SystemTime};
 //!
 //! // HumanCount
 //! assert_eq!(HumanCount::from(1_200).concise(), "1.2K");
 //! assert_eq!(HumanCount::from(1_200).to_string(), "1.2 thousand");
 //!
-//! # HumanSize
+//! // HumanSize
+//! // Binary (default, 1024-based)
+//! assert_eq!(HumanSize::from(5_242_880).concise(), "5 MiB");
+//! assert_eq!(HumanSize::from(5_242_880).full(), "5 mebibytes");
 //!
-//! Default is **binary (IEC)** (1024-based):
-//! ```rust
-//! use humaniser::HumanSize;
+//! // Decimal (SI, 1000-based)
+//! let hs = HumanSize::from(5_000_000);
+//! assert_eq!(hs.decimal().concise(), "5 MB");
+//! assert_eq!(hs.decimal().full(), "5 megabytes");
 //!
-//! assert_eq!(HumanSize::from(5_242_880).concise(), "5 MiB");       // Binary concise
-//! assert_eq!(HumanSize::from(5_242_880).full(), "5 mebibytes");    // Binary full
-//! ```
-//!
-//! You can also explicitly choose **decimal (SI)** (1000-based):
-//! ```rust
-//! use humaniser::{HumanSize, UnitSystem};
-//!
-//! let hs = HumanSize::from_with_system(5_000_000, UnitSystem::Decimal);
-//! assert_eq!(hs.concise(), "5 MB");       // Decimal concise
-//! assert_eq!(hs.full(), "5 megabytes");   // Decimal full
-//! ```
+//! // Ensure chaining works
+//! let hs2 = HumanSize::from(1_000_000);
+//! assert_eq!(hs2.binary().concise(), "976.6 KiB");
+//! assert_eq!(hs2.binary().full(), "976.6 kibibytes");
 //!
 //! // HumanDuration
-//! ```rust
-//! use std::time::{Duration, SystemTime};
 //! let now = SystemTime::now();
 //! let result = HumanDuration::from(Some(now - Duration::from_secs(75))).concise();
 //! assert!(result.contains("1m"));
@@ -100,7 +94,6 @@ pub use core::HumanDuration;
 pub use core::HumanPercent;
 pub use core::HumanSize;
 pub use core::HumanTime;
-pub use core::UnitSystem;
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
@@ -125,16 +118,28 @@ mod tests {
 
     #[test]
     fn test_human_size() {
+        // Binary (default)
         assert_eq!(HumanSize::from(500).concise(), "500 B");
         assert_eq!(HumanSize::from(1024).to_string(), "1 kibibyte");
         assert_eq!(HumanSize::from(1_048_576).to_string(), "1 mebibyte");
         assert_eq!(HumanSize::from(1_500_000).concise(), "1.4 MiB");
         assert_eq!(HumanSize::from(1_073_741_824).to_string(), "1 gibibyte");
+
+        // Decimal (SI)
+        let hs = HumanSize::from(5_000_000);
+        assert_eq!(hs.decimal().concise(), "5 MB");
+        assert_eq!(hs.decimal().to_string(), "5 megabytes");
+
+        // Ensure chaining works
+        let hs2 = HumanSize::from(1_000_000);
+        assert_eq!(hs2.binary().concise(), "976.6 KiB");
+        assert_eq!(hs2.binary().to_string(), "976.6 kibibytes");
     }
 
     #[test]
-    fn test_human_time() {
+    fn test_human_duration() {
         let now = SystemTime::now();
+
         assert_eq!(
             HumanDuration::from(Some(now - Duration::from_secs(0))).to_string(),
             "just now"
@@ -174,7 +179,7 @@ mod tests {
     }
 
     #[test]
-    fn test_human_duration() {
+    fn test_human_time() {
         assert_eq!(HumanTime::from(Duration::from_secs(45)).concise(), "45s");
         assert_eq!(HumanTime::from(Duration::from_secs(90)).concise(), "1m 30s");
         assert_eq!(
