@@ -34,11 +34,27 @@
 //! assert_eq!(HumanCount::from(1_200).concise(), "1.2K");
 //! assert_eq!(HumanCount::from(1_200).to_string(), "1.2 thousand");
 //!
-//! // HumanSize
-//! assert_eq!(HumanSize::from(5_242_880).concise(), "5 MiB");
-//! assert_eq!(HumanSize::from(5_242_880).to_string(), "5 mebibytes");
+//! # HumanSize
+//!
+//! Default is **binary (IEC)** (1024-based):
+//! ```rust
+//! use humaniser::HumanSize;
+//!
+//! assert_eq!(HumanSize::from(5_242_880).concise(), "5 MiB");       // Binary concise
+//! assert_eq!(HumanSize::from(5_242_880).full(), "5 mebibytes");    // Binary full
+//! ```
+//!
+//! You can also explicitly choose **decimal (SI)** (1000-based):
+//! ```rust
+//! use humaniser::{HumanSize, UnitSystem};
+//!
+//! let hs = HumanSize::from_with_system(5_000_000, UnitSystem::Decimal);
+//! assert_eq!(hs.concise(), "5 MB");       // Decimal concise
+//! assert_eq!(hs.full(), "5 megabytes");   // Decimal full
+//! ```
 //!
 //! // HumanDuration
+//! ```rust
 //! use std::time::{Duration, SystemTime};
 //! let now = SystemTime::now();
 //! let result = HumanDuration::from(Some(now - Duration::from_secs(75))).concise();
@@ -91,9 +107,7 @@ pub fn add(left: u64, right: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{
-        HumanCount, HumanDuration, HumanPercent, HumanSize, HumanTime,
-    };
+    use crate::core::{HumanCount, HumanDuration, HumanPercent, HumanSize, HumanTime};
     use std::time::{Duration, SystemTime};
 
     #[test]

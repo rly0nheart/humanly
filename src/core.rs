@@ -82,41 +82,55 @@ impl HumanCount {
 
 /* -------------------- HumanSize -------------------- */
 
+#[derive(Clone, Copy, Debug)]
+pub enum UnitSystem {
+    Binary,  // IEC, 1024-based
+    Decimal, // SI, 1000-based
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct HumanSize {
     bytes: u64,
+    system: UnitSystem,
 }
 
 impl HumanSize {
     pub fn from(bytes: u64) -> Self {
-        Self { bytes }
+        Self { bytes, system: UnitSystem::Binary }
+    }
+
+    pub fn from_with_system(bytes: u64, system: UnitSystem) -> Self {
+        Self { bytes, system }
     }
 
     pub fn concise(&self) -> String {
         self.format(HumanFormat::Concise)
     }
-    
-    fn full(&self) -> String {
+
+    pub fn full(&self) -> String {
         self.format(HumanFormat::Full)
     }
 
     fn format(&self, format: HumanFormat) -> String {
-        let concise_units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
-        let full_units = [
-            "bytes",
-            "kibibytes",
-            "mebibytes",
-            "gibibytes",
-            "tebibytes",
-            "pebibytes",
-            "exbibytes",
-            "zebibytes",
-            "yobibytes",
-        ];
+        // Unit arrays
+        let (units_short, units_full, step) = match self.system {
+            UnitSystem::Binary => (
+                ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"],
+                ["byte", "kibibyte", "mebibyte", "gibibyte", "tebibyte", "pebibyte", "exbibyte", "zebibyte", "yobibyte"],
+                1024.0,
+            ),
+            UnitSystem::Decimal => (
+                ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+                ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte", "petabyte", "exabyte", "zettabyte", "yottabyte"],
+                1000.0,
+            ),
+        };
+
         let mut size = self.bytes as f64;
         let mut idx = 0;
 
-        while size >= 1024.0 && idx < concise_units.len() - 1 {
-            size /= 1024.0;
+        while size >= step && idx < units_short.len() - 1 {
+            size /= step;
             idx += 1;
         }
 
@@ -128,9 +142,9 @@ impl HumanSize {
         };
 
         match format {
-            HumanFormat::Concise => format!("{} {}", formatted, concise_units[idx]),
+            HumanFormat::Concise => format!("{} {}", formatted, units_short[idx]),
             HumanFormat::Full => {
-                let unit = full_units[idx];
+                let unit = units_full[idx];
                 if rounded == 1.0 && unit.ends_with('s') {
                     format!("{} {}", formatted, &unit[..unit.len() - 1])
                 } else {
@@ -140,6 +154,7 @@ impl HumanSize {
         }
     }
 }
+
 
 /* -------------------- HumanDuration -------------------- */
 
