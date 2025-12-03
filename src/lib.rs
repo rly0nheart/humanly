@@ -17,11 +17,8 @@
 //! ```rust
 //! use humaniser::HumanCount;
 //!
-//! // This will print "1.8 thousand"
-//! println!("{}", HumanCount::from(1_800).to_string());
-//!
-//! // This will print "1.8K"
-//! println!("{}", HumanCount::from(1_800).concise());
+//! // This will print "1,800"
+//! println!("{}", HumanCount::format(1_800));
 //! ```
 //!
 //! ## Examples
@@ -31,8 +28,8 @@
 //! use std::time::{Duration, SystemTime};
 //!
 //! // HumanCount
-//! assert_eq!(HumanCount::from(1_200).concise(), "1.2K");
-//! assert_eq!(HumanCount::from(1_200).to_string(), "1.2 thousand");
+//! assert_eq!(HumanCount::format(1_200), "1,200");
+//! assert_eq!(HumanCount::format(1_800), "1,800");
 //!
 //! // HumanSize
 //! // Binary (default, 1024-based)
@@ -106,14 +103,14 @@ mod tests {
 
     #[test]
     fn test_human_count() {
-        assert_eq!(HumanCount::from(1_700_700).to_string(), "1.7 million");
-        assert_eq!(HumanCount::from(500).to_string(), "500");
-        assert_eq!(HumanCount::from(1_000).concise(), "1K");
-        assert_eq!(HumanCount::from(1_500).to_string(), "1.5 thousand");
-        assert_eq!(HumanCount::from(1_000_000).to_string(), "1 million");
-        assert_eq!(HumanCount::from(1_500_000).concise(), "1.5M");
-        assert_eq!(HumanCount::from(1_000_000_000).concise(), "1B");
-        assert_eq!(HumanCount::from(1_500_000_000).to_string(), "1.5 billion");
+        assert_eq!(HumanCount::format(1_700_700), "1,700,700");
+        assert_eq!(HumanCount::format(500), "500");
+        assert_eq!(HumanCount::format(1000), "1,000");
+        assert_eq!(HumanCount::format(1_500), "1,500");
+        assert_eq!(HumanCount::format(1_000_000), "1,000,000");
+        assert_eq!(HumanCount::format(1_500_000), "1,500,000");
+        assert_eq!(HumanCount::format(1_000_000_000), "1,000,000,000");
+        assert_eq!(HumanCount::format(1_500_000_000), "1,500,000,000");
     }
 
     #[test]

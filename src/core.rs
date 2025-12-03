@@ -17,66 +17,41 @@ macro_rules! human_display {
     };
 }
 
-human_display!(HumanCount);
+// human_display!(HumanCount);
 human_display!(HumanSize);
 human_display!(HumanDuration);
 human_display!(HumanTime);
 human_display!(HumanPercent);
 
 
-pub struct HumanCount {
-    number: u64,
-}
+pub struct HumanCount;
 
 impl HumanCount {
-    pub fn from(number: u64) -> Self {
-        Self { number }
-    }
+    pub fn format(number: impl Into<f64>) -> String {
+        let number = number.into();
+        let s = format!("{}", number);
+        let mut parts = s.split('.');
+        let int_part = parts.next().unwrap_or_default();
+        let frac_part = parts.next();
 
-    pub fn concise(&self) -> String {
-        self.format(HumanFormat::Concise)
-    }
-
-    fn full(&self) -> String {
-        self.format(HumanFormat::Full)
-    }
-
-    fn format(&self, format: HumanFormat) -> String {
-        let number = self.number as f64; // convert once to f64
-
-        let units = [
-            (1_000_000_000_000_000_000.0, "Qi", "quintillion"),
-            (1_000_000_000_000_000.0, "Q", "quadrillion"),
-            (1_000_000_000_000.0, "T", "trillion"),
-            (1_000_000_000.0, "B", "billion"),
-            (1_000_000.0, "M", "million"),
-            (1_000.0, "K", "thousand"),
-        ];
-
-        for (divisor, concise_suffix, full_suffix) in units {
-            if number >= divisor {
-                let val = number / divisor;
-                let rounded = (val * 10.0).floor() / 10.0; // floor prevents overflow to next unit
-                return match format {
-                    HumanFormat::Concise => {
-                        if rounded.fract() == 0.0 {
-                            format!("{}{}", rounded as u64, concise_suffix)
-                        } else {
-                            format!("{:.1}{}", rounded, concise_suffix)
-                        }
-                    }
-                    HumanFormat::Full => {
-                        if rounded.fract() == 0.0 {
-                            format!("{} {}", rounded as u64, full_suffix)
-                        } else {
-                            format!("{:.1} {}", rounded, full_suffix)
-                        }
-                    }
-                };
+        // Format integer part with commas
+        let mut result = String::with_capacity(int_part.len() + int_part.len() / 3);
+        let mut count = 0;
+        for character in int_part.chars().rev() {
+            if count != 0 && count % 3 == 0 {
+                result.push(',');
             }
+            result.push(character);
+            count += 1;
         }
+        let formatted_int: String = result.chars().rev().collect();
 
-        number.to_string()
+        // Append fractional part if exists
+        if let Some(frac) = frac_part {
+            format!("{}.{}", formatted_int, frac)
+        } else {
+            formatted_int
+        }
     }
 }
 
