@@ -1,6 +1,6 @@
 # Humaniser
 
-A small, ergonomic Rust crate to convert numbers, sizes, durations, times, percentages, and permissions
+A small Rust crate to convert numbers, sizes, durations, times, and percentages
 into human-readable formats.
 
 ## Features
@@ -9,7 +9,6 @@ into human-readable formats.
 - `HumanDuration` — Show how long ago a timestamp occurred in short format.
 - `HumanTime` — Convert `Duration` into H:M:S strings.
 - `HumanPercent` — Round floats and display as percentage string.
-- `HumanPermissions` — Partially uses [unix_mode](https://github.com/sourcefrog/unix_mode) to convert numeric mode to a readable permissions string.
 
 ## Examples
 
@@ -47,7 +46,6 @@ assert_eq!(
 ## Goals
 
 - Provide a simple, consistent API to make numeric and system values readable.
-- Cross-platform support for permissions (Unix and Windows).
 - Small, dependency-light, and ergonomic for CLI, web, or general Rust applications.
 
 ## Platform-specific behavior

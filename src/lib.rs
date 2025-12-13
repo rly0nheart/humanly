@@ -1,6 +1,6 @@
 //! # Humaniser
 //!
-//! A small, ergonomic Rust crate to convert numbers, sizes, durations, times, percentages, and permissions
+//! A small, ergonomic Rust crate to convert numbers, sizes, durations, times, and percentages
 //! into human-readable formats.
 //!
 //! ## Quick Links
@@ -63,13 +63,7 @@
 //! ## Goals
 //!
 //! - Provide a simple, consistent API to make numeric and system values readable.
-//! - Cross-platform support for permissions (Unix and Windows).
 //! - Small, dependency-light, and ergonomic for CLI, web, or general Rust applications.
-//!
-//! ## Platform-specific behavior
-//!
-//! - **Unix**: Permissions use `unix_mode` crate to show `rwx` strings with file type prefix.
-//! - **Windows**: Permissions are translated into descriptive text like `Read`, `Write`, `Execute`.
 //!
 //! ## Crate modules
 //!

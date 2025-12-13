@@ -1,8 +1,5 @@
 [package]
-name = "humaniser"
-description = "A small, ergonomic Rust crate to convert numbers, sizes, durations, times, percentages, and permissions into human-readable formats."
+name = "humanity"
+description = "A small Rust crate to convert numbers, sizes, durations, times, percentages, and permissions into human-readable formats."
 version = "0.1.0"
 edition = "2024"
-
-[dependencies]
-unix_mode = "0.1.4"
