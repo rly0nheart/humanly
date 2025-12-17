@@ -3,12 +3,13 @@
 A pure Rust crate to convert numbers, sizes, durations, times, and percentages
 into human-readable formats.
 
-## Quick Links
-- [`HumanNumber`]: Convert large numbers into k, M, B, T or thousand/million/billion/trillion
-- [`HumanSize`]: Convert bytes into KiB, MiB, GiB, etc.
-- [`HumanDuration`]: Show elapsed time since a timestamp in human-readable format
-- [`HumanTime`]: Format a `Duration` as H:M:S
-- [`HumanPercent`]: Round and format floating-point numbers as percentages
+## Crate modules
+
+- `HumanNumber` — Convert numbers to K/M/B/T notation (concise) or word format (full).
+- `HumanSize` — Convert bytes to human-readable units (KiB, MiB…).
+- `HumanDuration` — Show how long ago a timestamp occurred in short or long format.
+- `HumanTime` — Convert `Duration` into H:M:S strings.
+- `HumanPercent` — Round floats and display as percentage string.
 
 ## Output formats
 
@@ -68,11 +69,3 @@ assert_eq!(HumanTime::from(Duration::from_secs(3661)).to_string(), "1 hour 1 min
 assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
 assert_eq!(HumanPercent::from(12.3456, 1).to_string(), "12.3 percent");
 ```
-
-## Crate modules
-
-- `HumanNumber` — Convert numbers to K/M/B/T notation (concise) or word format (full).
-- `HumanSize` — Convert bytes to human-readable units (KiB, MiB…).
-- `HumanDuration` — Show how long ago a timestamp occurred in short or long format.
-- `HumanTime` — Convert `Duration` into H:M:S strings.
-- `HumanPercent` — Round floats and display as percentage string.
