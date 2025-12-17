@@ -4,7 +4,7 @@
 //! into human-readable formats.
 //!
 //! ## Quick Links
-//! - [`HumanCount`]: Convert large numbers into K, M, B, T, etc.
+//! - [`HumanNumber`]: Convert large numbers into K, M, B, T or formatted with commas
 //! - [`HumanSize`]: Convert bytes into KiB, MiB, GiB, etc.
 //! - [`HumanDuration`]: Show elapsed time since a timestamp in human-readable format
 //! - [`HumanTime`]: Format a `Duration` as H:M:S
@@ -12,24 +12,31 @@
 //!
 //! ## Output formats
 //!
-//! Each type provides `.concise()`, a formatting method that returns a concise version of the output:
+//! Each type provides `.concise()` and `.full()` methods for different output styles:
 //!
 //! ```rust
-//! use humanity::HumanCount;
+//! use humanity::HumanNumber;
 //!
-//! // This will print "1,800"
-//! println!("{}", HumanCount::format(1_800));
+//! // Concise: "1.8K"
+//! println!("{}", HumanNumber::from(1_800).concise());
+//!
+//! // Full (with commas): "1,800"
+//! println!("{}", HumanNumber::from(1_800).full());
 //! ```
 //!
 //! ## Examples
 //!
 //! ```rust
-//! use humanity::{HumanCount, HumanSize, HumanDuration, HumanTime, HumanPercent};
+//! use humanity::{HumanNumber, HumanSize, HumanDuration, HumanTime, HumanPercent};
 //! use std::time::{Duration, SystemTime};
 //!
-//! // HumanCount
-//! assert_eq!(HumanCount::format(1_200), "1,200");
-//! assert_eq!(HumanCount::format(1_800), "1,800");
+//! // HumanNumber
+//! assert_eq!(HumanNumber::from(1_200).concise(), "1.2k");
+//! assert_eq!(HumanNumber::from(1_200).full(), "1,200");
+//! assert_eq!(HumanNumber::from(1_800_000).concise(), "1.8M");
+//! assert_eq!(HumanNumber::from(1_800_000).full(), "1,800,000");
+//! assert_eq!(HumanNumber::from(2_500_000_000.0).concise(), "2.5B");
+//! assert_eq!(HumanNumber::from(3_700_000_000_000.0).concise(), "3.7T");
 //!
 //! // HumanSize
 //! // Binary (default, 1024-based)
@@ -67,20 +74,20 @@
 //!
 //! ## Crate modules
 //!
-//! - [`HumanCount`] — Convert numbers to readable short format (1K, 1M, 1B…).
+//! - [`HumanNumber`] — Convert numbers to K/M/B/T notation (concise) or comma-formatted (full).
 //! - [`HumanSize`] — Convert bytes to human-readable units (KiB, MiB…).
 //! - [`HumanDuration`] — Show how long ago a timestamp occurred in short or long format.
 //! - [`HumanTime`] — Convert `Duration` into H:M:S strings.
 //! - [`HumanPercent`] — Round floats and display as percentage string.
 //!
-//! [`HumanCount`]: struct.HumanCount.html
+//! [`HumanNumber`]: struct.HumanNumber.html
 //! [`HumanSize`]: struct.HumanSize.html
 //! [`HumanDuration`]: struct.HumanDuration.html
 //! [`HumanTime`]: struct.HumanTime.html
 //! [`HumanPercent`]: struct.HumanPercent.html
 
 mod core;
-pub use core::HumanCount;
+pub use core::HumanNumber;
 pub use core::HumanDuration;
 pub use core::HumanPercent;
 pub use core::HumanSize;
@@ -92,25 +99,49 @@ pub fn add(left: u64, right: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{HumanCount, HumanDuration, HumanPercent, HumanSize, HumanTime};
+    use crate::core::{HumanNumber, HumanDuration, HumanPercent, HumanSize, HumanTime};
     use std::time::{Duration, SystemTime};
 
     #[test]
-    fn test_human_count() {
-        assert_eq!(HumanCount::format(1_700_700), "1,700,700");
-        assert_eq!(HumanCount::format(500), "500");
-        assert_eq!(HumanCount::format(1000), "1,000");
-        assert_eq!(HumanCount::format(1_500), "1,500");
-        assert_eq!(HumanCount::format(1_000_000), "1,000,000");
-        assert_eq!(HumanCount::format(1_500_000), "1,500,000");
-        assert_eq!(HumanCount::format(1_000_000_000), "1,000,000,000");
-        assert_eq!(HumanCount::format(1_500_000_000), "1,500,000,000");
+    fn test_human_number() {
+        // Test full format (comma-separated)
+        assert_eq!(HumanNumber::from(500).full(), "500");
+        assert_eq!(HumanNumber::from(1_000).full(), "1,000");
+        assert_eq!(HumanNumber::from(1_500).full(), "1,500");
+        assert_eq!(HumanNumber::from(1_700_700).full(), "1,700,700");
+        assert_eq!(HumanNumber::from(1_000_000).full(), "1,000,000");
+        assert_eq!(HumanNumber::from(1_500_000).full(), "1,500,000");
+        assert_eq!(HumanNumber::from(1_000_000_000).full(), "1,000,000,000");
+        assert_eq!(HumanNumber::from(1_500_000_000).full(), "1,500,000,000");
+
+        // Test concise format (K/M/B/T notation)
+        assert_eq!(HumanNumber::from(500).concise(), "500");
+        assert_eq!(HumanNumber::from(999).concise(), "999");
+        assert_eq!(HumanNumber::from(1_000).concise(), "1k");
+        assert_eq!(HumanNumber::from(1_500).concise(), "1.5k");
+        assert_eq!(HumanNumber::from(1_700_700).concise(), "1.7M");
+        assert_eq!(HumanNumber::from(1_000_000).concise(), "1M");
+        assert_eq!(HumanNumber::from(1_500_000).concise(), "1.5M");
+        assert_eq!(HumanNumber::from(1_000_000_000).concise(), "1B");
+        assert_eq!(HumanNumber::from(1_500_000_000).concise(), "1.5B");
+        assert_eq!(HumanNumber::from(1_000_000_000_000.0).concise(), "1T");
+        assert_eq!(HumanNumber::from(2_500_000_000_000.0).concise(), "2.5T");
+
+        // Test Display trait (should use full format)
+        assert_eq!(HumanNumber::from(1_500).to_string(), "1,500");
+        assert_eq!(HumanNumber::from(1_500_000).to_string(), "1,500,000");
     }
 
     #[test]
     fn test_human_size() {
         // Binary (default)
-        assert_eq!(HumanSize::from(500).concise(), "500 B");
+        assert_eq!(HumanSize::from(0).concise(), "0");
+        assert_eq!(HumanSize::from(1).concise(), "1");
+        assert_eq!(HumanSize::from(1).full(), "1 byte");
+        assert_eq!(HumanSize::from(500).concise(), "500");
+        assert_eq!(HumanSize::from(500).full(), "500 bytes");
+        assert_eq!(HumanSize::from(1023).concise(), "1023");
+        assert_eq!(HumanSize::from(1024).concise(), "1 KiB");
         assert_eq!(HumanSize::from(1024).to_string(), "1 kibibyte");
         assert_eq!(HumanSize::from(1_048_576).to_string(), "1 mebibyte");
         assert_eq!(HumanSize::from(1_500_000).concise(), "1.4 MiB");

@@ -17,40 +17,94 @@ macro_rules! human_display {
     };
 }
 
-// human_display!(HumanCount);
+human_display!(HumanNumber);
 human_display!(HumanSize);
 human_display!(HumanDuration);
 human_display!(HumanTime);
 human_display!(HumanPercent);
 
+/* -------------------- HumanNumber -------------------- */
 
-pub struct HumanCount;
+pub struct HumanNumber {
+    number: f64,
+}
 
-impl HumanCount {
-    pub fn format(number: impl Into<f64>) -> String {
-        let number = number.into();
-        let s = format!("{}", number);
-        let mut parts = s.split('.');
-        let int_part = parts.next().unwrap_or_default();
-        let frac_part = parts.next();
-
-        // Format integer part with commas
-        let mut result = String::with_capacity(int_part.len() + int_part.len() / 3);
-        let mut count = 0;
-        for character in int_part.chars().rev() {
-            if count != 0 && count % 3 == 0 {
-                result.push(',');
-            }
-            result.push(character);
-            count += 1;
+impl HumanNumber {
+    pub fn from(number: impl Into<f64>) -> Self {
+        Self {
+            number: number.into(),
         }
-        let formatted_int: String = result.chars().rev().collect();
+    }
 
-        // Append fractional part if exists
-        if let Some(frac) = frac_part {
-            format!("{}.{}", formatted_int, frac)
-        } else {
-            formatted_int
+    pub fn concise(&self) -> String {
+        self.format(HumanFormat::Concise)
+    }
+
+    pub fn full(&self) -> String {
+        self.format(HumanFormat::Full)
+    }
+
+    fn format(&self, format: HumanFormat) -> String {
+        let number = self.number;
+        let abs_number = number.abs();
+
+        match format {
+            HumanFormat::Concise => {
+                if abs_number < 1_000.0 {
+                    format!("{}", number)
+                } else if abs_number < 1_000_000.0 {
+                    let value = number / 1_000.0;
+                    if value.fract() == 0.0 {
+                        format!("{}k", value as i64)
+                    } else {
+                        format!("{:.1}k", value)
+                    }
+                } else if abs_number < 1_000_000_000.0 {
+                    let value = number / 1_000_000.0;
+                    if value.fract() == 0.0 {
+                        format!("{}M", value as i64)
+                    } else {
+                        format!("{:.1}M", value)
+                    }
+                } else if abs_number < 1_000_000_000_000.0 {
+                    let value = number / 1_000_000_000.0;
+                    if value.fract() == 0.0 {
+                        format!("{}B", value as i64)
+                    } else {
+                        format!("{:.1}B", value)
+                    }
+                } else {
+                    let value = number / 1_000_000_000_000.0;
+                    if value.fract() == 0.0 {
+                        format!("{}T", value as i64)
+                    } else {
+                        format!("{:.1}T", value)
+                    }
+                }
+            }
+            HumanFormat::Full => {
+                let s = format!("{}", number);
+                let mut parts = s.split('.');
+                let int_part = parts.next().unwrap_or_default();
+                let frac_part = parts.next();
+
+                let mut result = String::with_capacity(int_part.len() + int_part.len() / 3);
+                let mut count = 0;
+                for character in int_part.chars().rev() {
+                    if count != 0 && count % 3 == 0 {
+                        result.push(',');
+                    }
+                    result.push(character);
+                    count += 1;
+                }
+                let formatted_int: String = result.chars().rev().collect();
+
+                if let Some(frac) = frac_part {
+                    format!("{}.{}", formatted_int, frac)
+                } else {
+                    formatted_int
+                }
+            }
         }
     }
 }
@@ -93,16 +147,30 @@ impl HumanSize {
     }
 
     fn format(&self, format: HumanFormat) -> String {
+        // If bytes, just return the number without suffix
+        if self.bytes < 1024 {
+            return match format {
+                HumanFormat::Concise => format!("{}", self.bytes),
+                HumanFormat::Full => {
+                    if self.bytes == 1 {
+                        "1 byte".to_string()
+                    } else {
+                        format!("{} bytes", self.bytes)
+                    }
+                }
+            };
+        }
+
         // Unit arrays
         let (units_short, units_full, step) = match self.system {
             UnitSystem::Binary => (
-                ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"],
-                ["byte", "kibibyte", "mebibyte", "gibibyte", "tebibyte", "pebibyte", "exbibyte", "zebibyte", "yobibyte"],
+                ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"],
+                ["kibibyte", "mebibyte", "gibibyte", "tebibyte", "pebibyte", "exbibyte", "zebibyte", "yobibyte"],
                 1024.0,
             ),
             UnitSystem::Decimal => (
-                ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
-                ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte", "petabyte", "exabyte", "zettabyte", "yottabyte"],
+                ["kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+                ["kilobyte", "megabyte", "gigabyte", "terabyte", "petabyte", "exabyte", "zettabyte", "yottabyte"],
                 1000.0,
             ),
         };
@@ -110,6 +178,10 @@ impl HumanSize {
         let mut size = self.bytes as f64;
         let mut idx = 0;
 
+        // First division to get to first unit (KiB or kB)
+        size /= step;
+
+        // Continue dividing if needed
         while size >= step && idx < units_short.len() - 1 {
             size /= step;
             idx += 1;
@@ -238,7 +310,7 @@ impl HumanTime {
     pub fn concise(&self) -> String {
         self.format(HumanFormat::Concise)
     }
-    
+
     fn full(&self) -> String {
         self.format(HumanFormat::Full)
     }
@@ -323,6 +395,5 @@ impl HumanPercent {
             HumanFormat::Concise => format!("{}%", rounded),
             HumanFormat::Full => format!("{} percent", rounded),
         }
-
     }
 }
