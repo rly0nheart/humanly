@@ -4,7 +4,7 @@
 //! into human-readable formats.
 //!
 //! ## Quick Links
-//! - [`HumanNumber`]: Convert large numbers into K, M, B, T or formatted with commas
+//! - [`HumanNumber`]: Convert large numbers into K, M, B, T or thousand/million/billion/trillion
 //! - [`HumanSize`]: Convert bytes into KiB, MiB, GiB, etc.
 //! - [`HumanDuration`]: Show elapsed time since a timestamp in human-readable format
 //! - [`HumanTime`]: Format a `Duration` as H:M:S
@@ -17,10 +17,10 @@
 //! ```rust
 //! use humanity::HumanNumber;
 //!
-//! // Concise: "1.8K"
+//! // Concise: "1.8k"
 //! println!("{}", HumanNumber::from(1_800).concise());
 //!
-//! // Full (with commas): "1,800"
+//! // Full: "1.8 thousand"
 //! println!("{}", HumanNumber::from(1_800).full());
 //! ```
 //!
@@ -32,11 +32,13 @@
 //!
 //! // HumanNumber
 //! assert_eq!(HumanNumber::from(1_200).concise(), "1.2k");
-//! assert_eq!(HumanNumber::from(1_200).full(), "1,200");
+//! assert_eq!(HumanNumber::from(1_200).full(), "1.2 thousand");
 //! assert_eq!(HumanNumber::from(1_800_000).concise(), "1.8M");
-//! assert_eq!(HumanNumber::from(1_800_000).full(), "1,800,000");
+//! assert_eq!(HumanNumber::from(1_800_000).full(), "1.8 million");
 //! assert_eq!(HumanNumber::from(2_500_000_000.0).concise(), "2.5B");
+//! assert_eq!(HumanNumber::from(2_500_000_000.0).full(), "2.5 billion");
 //! assert_eq!(HumanNumber::from(3_700_000_000_000.0).concise(), "3.7T");
+//! assert_eq!(HumanNumber::from(3_700_000_000_000.0).full(), "3.7 trillion");
 //!
 //! // HumanSize
 //! // Binary (default, 1024-based)
@@ -74,7 +76,7 @@
 //!
 //! ## Crate modules
 //!
-//! - [`HumanNumber`] — Convert numbers to K/M/B/T notation (concise) or comma-formatted (full).
+//! - [`HumanNumber`] — Convert numbers to K/M/B/T notation (concise) or word format (full).
 //! - [`HumanSize`] — Convert bytes to human-readable units (KiB, MiB…).
 //! - [`HumanDuration`] — Show how long ago a timestamp occurred in short or long format.
 //! - [`HumanTime`] — Convert `Duration` into H:M:S strings.
@@ -104,15 +106,17 @@ mod tests {
 
     #[test]
     fn test_human_number() {
-        // Test full format (comma-separated)
+        // Test full format (word format)
         assert_eq!(HumanNumber::from(500).full(), "500");
-        assert_eq!(HumanNumber::from(1_000).full(), "1,000");
-        assert_eq!(HumanNumber::from(1_500).full(), "1,500");
-        assert_eq!(HumanNumber::from(1_700_700).full(), "1,700,700");
-        assert_eq!(HumanNumber::from(1_000_000).full(), "1,000,000");
-        assert_eq!(HumanNumber::from(1_500_000).full(), "1,500,000");
-        assert_eq!(HumanNumber::from(1_000_000_000).full(), "1,000,000,000");
-        assert_eq!(HumanNumber::from(1_500_000_000).full(), "1,500,000,000");
+        assert_eq!(HumanNumber::from(1_000).full(), "1 thousand");
+        assert_eq!(HumanNumber::from(1_500).full(), "1.5 thousand");
+        assert_eq!(HumanNumber::from(1_700_700).full(), "1.7 million");
+        assert_eq!(HumanNumber::from(1_000_000).full(), "1 million");
+        assert_eq!(HumanNumber::from(1_500_000).full(), "1.5 million");
+        assert_eq!(HumanNumber::from(1_000_000_000).full(), "1 billion");
+        assert_eq!(HumanNumber::from(1_500_000_000).full(), "1.5 billion");
+        assert_eq!(HumanNumber::from(1_000_000_000_000.0).full(), "1 trillion");
+        assert_eq!(HumanNumber::from(2_500_000_000_000.0).full(), "2.5 trillion");
 
         // Test concise format (K/M/B/T notation)
         assert_eq!(HumanNumber::from(500).concise(), "500");
@@ -127,9 +131,13 @@ mod tests {
         assert_eq!(HumanNumber::from(1_000_000_000_000.0).concise(), "1T");
         assert_eq!(HumanNumber::from(2_500_000_000_000.0).concise(), "2.5T");
 
+        // Test that trailing .0 is removed
+        assert_eq!(HumanNumber::from(100_000).concise(), "100k");
+        assert_eq!(HumanNumber::from(5_000_000).concise(), "5M");
+
         // Test Display trait (should use full format)
-        assert_eq!(HumanNumber::from(1_500).to_string(), "1,500");
-        assert_eq!(HumanNumber::from(1_500_000).to_string(), "1,500,000");
+        assert_eq!(HumanNumber::from(1_500).to_string(), "1.5 thousand");
+        assert_eq!(HumanNumber::from(1_500_000).to_string(), "1.5 million");
     }
 
     #[test]

@@ -48,67 +48,32 @@ impl HumanNumber {
         let number = self.number;
         let abs_number = number.abs();
 
+        let (divisor, short_suffix, long_suffix) = if abs_number < 1_000.0 {
+            (1.0, "", "")
+        } else if abs_number < 1_000_000.0 {
+            (1_000.0, "k", " thousand")
+        } else if abs_number < 1_000_000_000.0 {
+            (1_000_000.0, "M", " million")
+        } else if abs_number < 1_000_000_000_000.0 {
+            (1_000_000_000.0, "B", " billion")
+        } else {
+            (1_000_000_000_000.0, "T", " trillion")
+        };
+
+        let value = number / divisor;
+        let formatted = if value.fract() == 0.0 {
+            format!("{}", value as i64)
+        } else {
+            let s = format!("{:.1}", value);
+            s.trim_end_matches('0').trim_end_matches('.').to_string()
+        };
+
         match format {
-            HumanFormat::Concise => {
-                if abs_number < 1_000.0 {
-                    format!("{}", number)
-                } else if abs_number < 1_000_000.0 {
-                    let value = number / 1_000.0;
-                    if value.fract() == 0.0 {
-                        format!("{}k", value as i64)
-                    } else {
-                        format!("{:.1}k", value)
-                    }
-                } else if abs_number < 1_000_000_000.0 {
-                    let value = number / 1_000_000.0;
-                    if value.fract() == 0.0 {
-                        format!("{}M", value as i64)
-                    } else {
-                        format!("{:.1}M", value)
-                    }
-                } else if abs_number < 1_000_000_000_000.0 {
-                    let value = number / 1_000_000_000.0;
-                    if value.fract() == 0.0 {
-                        format!("{}B", value as i64)
-                    } else {
-                        format!("{:.1}B", value)
-                    }
-                } else {
-                    let value = number / 1_000_000_000_000.0;
-                    if value.fract() == 0.0 {
-                        format!("{}T", value as i64)
-                    } else {
-                        format!("{:.1}T", value)
-                    }
-                }
-            }
-            HumanFormat::Full => {
-                let s = format!("{}", number);
-                let mut parts = s.split('.');
-                let int_part = parts.next().unwrap_or_default();
-                let frac_part = parts.next();
-
-                let mut result = String::with_capacity(int_part.len() + int_part.len() / 3);
-                let mut count = 0;
-                for character in int_part.chars().rev() {
-                    if count != 0 && count % 3 == 0 {
-                        result.push(',');
-                    }
-                    result.push(character);
-                    count += 1;
-                }
-                let formatted_int: String = result.chars().rev().collect();
-
-                if let Some(frac) = frac_part {
-                    format!("{}.{}", formatted_int, frac)
-                } else {
-                    formatted_int
-                }
-            }
+            HumanFormat::Concise => format!("{}{}", formatted, short_suffix),
+            HumanFormat::Full => format!("{}{}", formatted, long_suffix),
         }
     }
 }
-
 /* -------------------- HumanSize -------------------- */
 
 #[derive(Clone, Copy, Debug)]
