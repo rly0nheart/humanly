@@ -4,7 +4,7 @@
 //! into human-readable formats.
 //!
 //! ## Quick Links
-//! - [`HumanNumber`]: Convert large numbers into K, M, B, T or thousand/million/billion/trillion
+//! - [`HumanNumber`]: Convert large numbers into k, M, B, T or thousand/million/billion/trillion
 //! - [`HumanSize`]: Convert bytes into KiB, MiB, GiB, etc.
 //! - [`HumanDuration`]: Show elapsed time since a timestamp in human-readable format
 //! - [`HumanTime`]: Format a `Duration` as H:M:S
