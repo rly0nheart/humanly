@@ -1,4 +1,4 @@
-# Humaniser
+# Humanity
 
 A pure Rust crate to convert numbers, sizes, durations, times, and percentages
 into human-readable formats.
@@ -13,7 +13,7 @@ into human-readable formats.
 ## Examples
 
 ```rust
-use humaniser::*;
+use humanity::*;
 
 // HumanCount
 assert_eq!(HumanCount::from(1_200), "1.2K");

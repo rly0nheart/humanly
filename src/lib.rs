@@ -1,6 +1,6 @@
-//! # Humaniser
+//! # Humanity
 //!
-//! A small, ergonomic Rust crate to convert numbers, sizes, durations, times, and percentages
+//! A pure Rust crate to convert numbers, sizes, durations, times, and percentages
 //! into human-readable formats.
 //!
 //! ## Quick Links
@@ -15,7 +15,7 @@
 //! Each type provides `.concise()`, a formatting method that returns a concise version of the output:
 //!
 //! ```rust
-//! use humaniser::HumanCount;
+//! use humanity::HumanCount;
 //!
 //! // This will print "1,800"
 //! println!("{}", HumanCount::format(1_800));
@@ -24,7 +24,7 @@
 //! ## Examples
 //!
 //! ```rust
-//! use humaniser::{HumanCount, HumanSize, HumanDuration, HumanTime, HumanPercent};
+//! use humanity::{HumanCount, HumanSize, HumanDuration, HumanTime, HumanPercent};
 //! use std::time::{Duration, SystemTime};
 //!
 //! // HumanCount
