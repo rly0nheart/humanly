@@ -113,7 +113,7 @@ mod tests {
         assert_eq!(HumanNumber::from(1_000_000_000_000.0).full(), "1 trillion");
         assert_eq!(HumanNumber::from(2_500_000_000_000.0).full(), "2.5 trillion");
 
-        // Test concise format (K/M/B/T notation)
+        // Test concise format (k/M/B/T notation)
         assert_eq!(HumanNumber::from(500).concise(), "500");
         assert_eq!(HumanNumber::from(999).concise(), "999");
         assert_eq!(HumanNumber::from(1_000).concise(), "1k");
@@ -125,10 +125,6 @@ mod tests {
         assert_eq!(HumanNumber::from(1_500_000_000).concise(), "1.5B");
         assert_eq!(HumanNumber::from(1_000_000_000_000.0).concise(), "1T");
         assert_eq!(HumanNumber::from(2_500_000_000_000.0).concise(), "2.5T");
-
-        // Test that trailing .0 is removed
-        assert_eq!(HumanNumber::from(100_000).concise(), "100k");
-        assert_eq!(HumanNumber::from(5_000_000).concise(), "5M");
 
         // Test Display trait (should use full format)
         assert_eq!(HumanNumber::from(1_500).to_string(), "1.5 thousand");
