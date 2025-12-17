@@ -3,32 +3,76 @@
 A pure Rust crate to convert numbers, sizes, durations, times, and percentages
 into human-readable formats.
 
-## Features
-- `HumanCount` — Convert numbers to readable short format (1K, 1M, 1B…).
-- `HumanSize` — Convert bytes to human-readable units (KiB, MiB…).
-- `HumanDuration` — Show how long ago a timestamp occurred in short format.
-- `HumanTime` — Convert `Duration` into H:M:S strings.
-- `HumanPercent` — Round floats and display as percentage string.
+## Quick Links
+- [`HumanNumber`]: Convert large numbers into K, M, B, T or thousand/million/billion/trillion
+- [`HumanSize`]: Convert bytes into KiB, MiB, GiB, etc.
+- [`HumanDuration`]: Show elapsed time since a timestamp in human-readable format
+- [`HumanTime`]: Format a `Duration` as H:M:S
+- [`HumanPercent`]: Round and format floating-point numbers as percentages
+
+## Output formats
+
+Each type provides `.concise()` and `.full()` methods for different output styles:
+
+```rust
+use humanity::HumanNumber;
+
+// Concise: "1.8k"
+println!("{}", HumanNumber::from(1_800).concise());
+
+// Full: "1.8 thousand"
+println!("{}", HumanNumber::from(1_800).full());
+```
 
 ## Examples
 
 ```rust
-use humanity::*;
+use humanity::{HumanNumber, HumanSize, HumanDuration, HumanTime, HumanPercent};
+use std::time::{Duration, SystemTime};
 
-// HumanCount
-assert_eq!(HumanCount::from(1_200), "1.2K");
+// HumanNumber
+assert_eq!(HumanNumber::from(1_200).concise(), "1.2k");
+assert_eq!(HumanNumber::from(1_200).full(), "1.2 thousand");
+assert_eq!(HumanNumber::from(1_800_000).concise(), "1.8M");
+assert_eq!(HumanNumber::from(1_800_000).full(), "1.8 million");
+assert_eq!(HumanNumber::from(2_500_000_000.0).concise(), "2.5B");
+assert_eq!(HumanNumber::from(2_500_000_000.0).full(), "2.5 billion");
+assert_eq!(HumanNumber::from(3_700_000_000_000.0).concise(), "3.7T");
+assert_eq!(HumanNumber::from(3_700_000_000_000.0).full(), "3.7 trillion");
 
 // HumanSize
-assert_eq!(HumanSize::from(5_242_880), "5 MiB");
+// Binary (default, 1024-based)
+assert_eq!(HumanSize::from(5_242_880).concise(), "5 MiB");
+assert_eq!(HumanSize::from(5_242_880).full(), "5 mebibytes");
+
+// Decimal (SI, 1000-based)
+let human_size = HumanSize::from(5_000_000);
+assert_eq!(human_size.decimal().concise(), "5 MB");
+assert_eq!(human_size.decimal().full(), "5 megabytes");
+
+// Ensure chaining works
+let human_size_2 = HumanSize::from(1_000_000);
+assert_eq!(human_size_2.binary().concise(), "976.6 KiB");
+assert_eq!(human_size_2.binary().full(), "976.6 kibibytes");
 
 // HumanDuration
-use std::time::{Duration, SystemTime};
 let now = SystemTime::now();
-assert!(HumanDuration::from(Some(now - Duration::from_secs(75))).contains("1m"));
+let result = HumanDuration::from(Some(now - Duration::from_secs(75))).concise();
+assert!(result.contains("1m"));
 
 // HumanTime
-assert_eq!(HumanTime::from(Duration::from_secs(3661)), "1h 1m 1s");
+assert_eq!(HumanTime::from(Duration::from_secs(3661)).concise(), "1h 1m 1s");
+assert_eq!(HumanTime::from(Duration::from_secs(3661)).to_string(), "1 hour 1 minute 1 second");
 
 // HumanPercent
-assert_eq!(HumanPercent::from(12.3456, 1), "12.3%");
+assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
+assert_eq!(HumanPercent::from(12.3456, 1).to_string(), "12.3 percent");
 ```
+
+## Crate modules
+
+- `HumanNumber` — Convert numbers to K/M/B/T notation (concise) or word format (full).
+- `HumanSize` — Convert bytes to human-readable units (KiB, MiB…).
+- `HumanDuration` — Show how long ago a timestamp occurred in short or long format.
+- `HumanTime` — Convert `Duration` into H:M:S strings.
+- `HumanPercent` — Round floats and display as percentage string.

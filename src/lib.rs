@@ -46,14 +46,14 @@
 //! assert_eq!(HumanSize::from(5_242_880).full(), "5 mebibytes");
 //!
 //! // Decimal (SI, 1000-based)
-//! let hs = HumanSize::from(5_000_000);
-//! assert_eq!(hs.decimal().concise(), "5 MB");
-//! assert_eq!(hs.decimal().full(), "5 megabytes");
+//! let human_size = HumanSize::from(5_000_000);
+//! assert_eq!(human_size.decimal().concise(), "5 MB");
+//! assert_eq!(human_size.decimal().full(), "5 megabytes");
 //!
 //! // Ensure chaining works
-//! let hs2 = HumanSize::from(1_000_000);
-//! assert_eq!(hs2.binary().concise(), "976.6 KiB");
-//! assert_eq!(hs2.binary().full(), "976.6 kibibytes");
+//! let human_size_2 = HumanSize::from(1_000_000);
+//! assert_eq!(human_size_2.binary().concise(), "976.6 KiB");
+//! assert_eq!(human_size_2.binary().full(), "976.6 kibibytes");
 //!
 //! // HumanDuration
 //! let now = SystemTime::now();
@@ -68,11 +68,6 @@
 //! assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
 //! assert_eq!(HumanPercent::from(12.3456, 1).to_string(), "12.3 percent");
 //! ```
-//!
-//! ## Goals
-//!
-//! - Provide a simple, consistent API to make numeric and system values readable.
-//! - Small, dependency-light, and ergonomic for CLI, web, or general Rust applications.
 //!
 //! ## Crate modules
 //!
