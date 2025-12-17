@@ -1,6 +1,6 @@
 # Humaniser
 
-A small Rust crate to convert numbers, sizes, durations, times, and percentages
+A pure Rust crate to convert numbers, sizes, durations, times, and percentages
 into human-readable formats.
 
 ## Features
@@ -31,25 +31,4 @@ assert_eq!(HumanTime::from(Duration::from_secs(3661)), "1h 1m 1s");
 
 // HumanPercent
 assert_eq!(HumanPercent::from(12.3456, 1), "12.3%");
-
-// HumanPermissions (Unix example)
-assert_eq!(HumanPermissions::from(0o40755), "drwxr-xr-x");
-
-// HumanPermissions (Windows-style)
-#[cfg(windows)]
-assert_eq!(
-    HumanPermissions::from(0o40755),
-    "User: Read, Write, Execute; Group: Read, Execute; Other: Read, Execute"
-);
 ```
-
-## Goals
-
-- Provide a simple, consistent API to make numeric and system values readable.
-- Small, dependency-light, and ergonomic for CLI, web, or general Rust applications.
-
-## Platform-specific behavior
-
-- **Unix**: Permissions use `unix_mode` crate to show `rwx` strings with file type prefix.
-- **Windows**: Permissions are translated into descriptive text like `Read`, `Write`, `Execute` (this is untested)
-

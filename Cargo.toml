@@ -1,5 +1,5 @@
 [package]
 name = "humanity"
-description = "A small Rust crate to convert numbers, sizes, durations, times, percentages, and permissions into human-readable formats."
+description = "A pure Rust crate to convert numbers, sizes, durations, times, and percentages into human-readable formats."
 version = "0.1.0"
 edition = "2024"
