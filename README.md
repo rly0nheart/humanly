@@ -16,7 +16,7 @@ into human-readable formats.
 Each type provides `.concise()` and `.full()` methods for different output styles:
 
 ```rust
-use humanity::HumanNumber;
+use humanly::HumanNumber;
 
 // Concise: "1.8k"
 println!("{}", HumanNumber::from(1_800).concise());
@@ -28,7 +28,7 @@ println!("{}", HumanNumber::from(1_800).full());
 ## Examples
 
 ```rust
-use humanity::{HumanNumber, HumanSize, HumanDuration, HumanTime, HumanPercent};
+use humanly::{HumanNumber, HumanSize, HumanDuration, HumanTime, HumanPercent};
 use std::time::{Duration, SystemTime};
 
 // HumanNumber
