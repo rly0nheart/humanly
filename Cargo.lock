@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "humanity"
+name = "humanly"
 version = "0.1.0"

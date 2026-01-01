@@ -1,4 +1,4 @@
-# Humanity
+# Humanly
 
 A pure Rust crate to convert numbers, sizes, durations, times, and percentages
 into human-readable formats.
