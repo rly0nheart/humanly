@@ -90,7 +90,10 @@ pub struct HumanSize {
 
 impl HumanSize {
     pub fn from(bytes: u64) -> Self {
-        Self { bytes, system: UnitSystem::Binary }
+        Self {
+            bytes,
+            system: UnitSystem::Binary,
+        }
     }
 
     pub fn decimal(mut self) -> Self {
@@ -130,12 +133,24 @@ impl HumanSize {
         let (units_short, units_full, step) = match self.system {
             UnitSystem::Binary => (
                 ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"],
-                ["kibibyte", "mebibyte", "gibibyte", "tebibyte", "pebibyte", "exbibyte", "zebibyte", "yobibyte"],
+                [
+                    "kibibyte", "mebibyte", "gibibyte", "tebibyte", "pebibyte", "exbibyte",
+                    "zebibyte", "yobibyte",
+                ],
                 1024.0,
             ),
             UnitSystem::Decimal => (
                 ["kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
-                ["kilobyte", "megabyte", "gigabyte", "terabyte", "petabyte", "exabyte", "zettabyte", "yottabyte"],
+                [
+                    "kilobyte",
+                    "megabyte",
+                    "gigabyte",
+                    "terabyte",
+                    "petabyte",
+                    "exabyte",
+                    "zettabyte",
+                    "yottabyte",
+                ],
                 1000.0,
             ),
         };
@@ -163,13 +178,16 @@ impl HumanSize {
             HumanFormat::Concise => format!("{} {}", formatted, units_short[idx]),
             HumanFormat::Full => {
                 let unit = units_full[idx];
-                let pluralized = if rounded == 1.0 { unit.to_string() } else { format!("{}s", unit) };
+                let pluralized = if rounded == 1.0 {
+                    unit.to_string()
+                } else {
+                    format!("{}s", unit)
+                };
                 format!("{} {}", formatted, pluralized)
             }
         }
     }
 }
-
 
 /* -------------------- HumanDuration -------------------- */
 

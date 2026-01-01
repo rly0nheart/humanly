@@ -84,8 +84,8 @@
 //! [`HumanPercent`]: struct.HumanPercent.html
 
 mod core;
-pub use core::HumanNumber;
 pub use core::HumanDuration;
+pub use core::HumanNumber;
 pub use core::HumanPercent;
 pub use core::HumanSize;
 pub use core::HumanTime;
@@ -96,7 +96,7 @@ pub fn add(left: u64, right: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{HumanNumber, HumanDuration, HumanPercent, HumanSize, HumanTime};
+    use crate::core::{HumanDuration, HumanNumber, HumanPercent, HumanSize, HumanTime};
     use std::time::{Duration, SystemTime};
 
     #[test]
@@ -111,7 +111,10 @@ mod tests {
         assert_eq!(HumanNumber::from(1_000_000_000).full(), "1 billion");
         assert_eq!(HumanNumber::from(1_500_000_000).full(), "1.5 billion");
         assert_eq!(HumanNumber::from(1_000_000_000_000.0).full(), "1 trillion");
-        assert_eq!(HumanNumber::from(2_500_000_000_000.0).full(), "2.5 trillion");
+        assert_eq!(
+            HumanNumber::from(2_500_000_000_000.0).full(),
+            "2.5 trillion"
+        );
 
         // Test concise format (k/M/B/T notation)
         assert_eq!(HumanNumber::from(500).concise(), "500");
@@ -214,6 +217,9 @@ mod tests {
         assert_eq!(HumanPercent::from(12.3456, 0).concise(), "12%");
         assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
         assert_eq!(HumanPercent::from(12.3456, 2).to_string(), "12.35 percent");
-        assert_eq!(HumanPercent::from(0.1234 * 100.0, 1).to_string(), "12.3 percent");
+        assert_eq!(
+            HumanPercent::from(0.1234 * 100.0, 1).to_string(),
+            "12.3 percent"
+        );
     }
 }

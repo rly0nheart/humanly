@@ -3,7 +3,7 @@
 A pure Rust crate to convert numbers, sizes, durations, times, and percentages
 into human-readable formats.
 
-## Crate modules
+## Crate Modules
 
 - `HumanNumber` — Convert numbers to K/M/B/T notation (concise) or word format (full).
 - `HumanSize` — Convert bytes to human-readable units (KiB, MiB…).
@@ -11,7 +11,7 @@ into human-readable formats.
 - `HumanTime` — Convert `Duration` into H:M:S strings.
 - `HumanPercent` — Round floats and display as percentage string.
 
-## Output formats
+## Output Formats
 
 Each type provides `.concise()` and `.full()` methods for different output styles:
 
@@ -50,11 +50,6 @@ assert_eq!(HumanSize::from(5_242_880).full(), "5 mebibytes");
 let human_size = HumanSize::from(5_000_000);
 assert_eq!(human_size.decimal().concise(), "5 MB");
 assert_eq!(human_size.decimal().full(), "5 megabytes");
-
-// Ensure chaining works
-let human_size_2 = HumanSize::from(1_000_000);
-assert_eq!(human_size_2.binary().concise(), "976.6 KiB");
-assert_eq!(human_size_2.binary().full(), "976.6 kibibytes");
 
 // HumanDuration
 let now = SystemTime::now();
