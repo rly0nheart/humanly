@@ -1,9 +1,10 @@
 [package]
 name = "humanly"
 description = "A pure Rust crate to convert numbers, sizes, durations, times, and percentages into human-readable formats."
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "MIT"
 readme = "README.md"
 authors = ["Ritchie Mwewa <hi@rly0nheart.com>"]
 repository = "https://codeberg.org/rly0nheart/humanly"
+keywords = ["humanise", "humanize","human-readable", "readable"]
