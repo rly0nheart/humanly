@@ -1,7 +1,7 @@
 [package]
 name = "humanly"
 description = "A pure Rust crate to convert numbers, sizes, durations, times, and percentages into human-readable formats."
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 license = "MIT"
 readme = "README.md"
