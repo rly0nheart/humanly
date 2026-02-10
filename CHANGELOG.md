@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Security
 
+## [0.1.4] - 2026-02-11
+### Changed
+- Add in-code doc strings
+- Rename `src/core.rs` to `src/humanly.rs`
 ## [0.1.3] - 2026-01-27
 
 ### Added

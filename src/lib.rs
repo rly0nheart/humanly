@@ -83,20 +83,38 @@
 //! [`HumanTime`]: struct.HumanTime.html
 //! [`HumanPercent`]: struct.HumanPercent.html
 
-mod core;
-pub use core::HumanDuration;
-pub use core::HumanNumber;
-pub use core::HumanPercent;
-pub use core::HumanSize;
-pub use core::HumanTime;
+mod humanly;
+pub use humanly::HumanDuration;
+pub use humanly::HumanNumber;
+pub use humanly::HumanPercent;
+pub use humanly::HumanSize;
+pub use humanly::HumanTime;
 
+/// Adds two unsigned 64-bit integers together.
+///
+/// # Parameters
+///
+/// * `left` - The first operand.
+/// * `right` - The second operand.
+///
+/// # Returns
+///
+/// The sum of `left` and `right` as a `u64`.
+///
+/// # Examples
+///
+/// ```
+/// use humanly::add;
+///
+/// assert_eq!(add(2, 3), 5);
+/// ```
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{HumanDuration, HumanNumber, HumanPercent, HumanSize, HumanTime};
+    use crate::humanly::{HumanDuration, HumanNumber, HumanPercent, HumanSize, HumanTime};
     use std::time::{Duration, SystemTime};
 
     #[test]
