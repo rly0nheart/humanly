@@ -155,12 +155,12 @@ mod tests {
     #[test]
     fn test_human_size() {
         // Binary (default)
-        assert_eq!(HumanSize::from(0).concise(), "0");
-        assert_eq!(HumanSize::from(1).concise(), "1");
+        assert_eq!(HumanSize::from(0).concise(), "0 B");
+        assert_eq!(HumanSize::from(1).concise(), "1 B");
         assert_eq!(HumanSize::from(1).full(), "1 byte");
-        assert_eq!(HumanSize::from(500).concise(), "500");
+        assert_eq!(HumanSize::from(500).concise(), "500 B");
         assert_eq!(HumanSize::from(500).full(), "500 bytes");
-        assert_eq!(HumanSize::from(1023).concise(), "1023");
+        assert_eq!(HumanSize::from(1023).concise(), "1023 B");
         assert_eq!(HumanSize::from(1024).concise(), "1 KiB");
         assert_eq!(HumanSize::from(1024).to_string(), "1 kibibyte");
         assert_eq!(HumanSize::from(1_048_576).to_string(), "1 mebibyte");

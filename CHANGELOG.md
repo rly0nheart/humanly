@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Security
 
+## [0.1.5] - 2026-07-11
+### Changed
+- Show bytes with a 'B' suffix
+
 ## [0.1.4] - 2026-02-11
 ### Changed
 - Add in-code doc strings

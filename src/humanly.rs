@@ -258,7 +258,7 @@ impl HumanSize {
 
     /// Returns the size in concise format with abbreviated unit suffixes.
     ///
-    /// Values below 1,024 bytes are returned as a plain number without a unit.
+    /// Values below 1,024 bytes are returned with the `B` unit.
     ///
     /// # Returns
     ///
@@ -269,7 +269,7 @@ impl HumanSize {
     /// ```
     /// use humanly::HumanSize;
     ///
-    /// assert_eq!(HumanSize::from(500).concise(), "500");
+    /// assert_eq!(HumanSize::from(500).concise(), "500 B");
     /// assert_eq!(HumanSize::from(1024).concise(), "1 KiB");
     /// assert_eq!(HumanSize::from(5_242_880).concise(), "5 MiB");
     /// assert_eq!(HumanSize::from(5_000_000).decimal().concise(), "5 MB");
@@ -302,10 +302,10 @@ impl HumanSize {
     }
 
     fn format(&self, format: HumanFormat) -> String {
-        // If bytes, just return the number without suffix
+        // If bytes, return the number with the `B` unit
         if self.bytes < 1024 {
             return match format {
-                HumanFormat::Concise => format!("{}", self.bytes),
+                HumanFormat::Concise => format!("{} B", self.bytes),
                 HumanFormat::Full => {
                     if self.bytes == 1 {
                         "1 byte".to_string()
