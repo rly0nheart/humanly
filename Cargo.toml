@@ -1,10 +1,13 @@
 [package]
-name = "humanly"
+name = "libhuman"
 description = "A pure-Rust crate to convert numbers, sizes, durations, times, and percentages into human-readable formats."
-version = "0.1.5"
+version = "0.2.0"
 edition = "2024"
 license = "MIT"
 readme = "README.md"
 authors = ["Ritchie Mwewa <hi@rly0nheart.com>"]
-repository = "https://codeberg.org/rly0nheart/humanly"
-keywords = ["humanise", "humanize","human-readable", "readable"]
+repository = "https://codeberg.org/rly0nheart/libhuman"
+keywords = ["humanise", "humanize","human-readable", "humantime", "humansize"]
+
+[lib]
+name = 'human'

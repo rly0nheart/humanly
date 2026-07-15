@@ -1,4 +1,4 @@
-//! # humanly
+//! # libhuman
 //!
 //! A pure Rust crate to convert numbers, sizes, durations, times, and percentages
 //! into human-readable formats.
@@ -6,237 +6,247 @@
 //! ## Quick Links
 //! - [`HumanNumber`]: Convert large numbers into k, M, B, T or thousand/million/billion/trillion
 //! - [`HumanSize`]: Convert bytes into KiB, MiB, GiB, etc.
-//! - [`HumanDuration`]: Show elapsed time since a timestamp in human-readable format
-//! - [`HumanTime`]: Format a `Duration` as H:M:S
+//! - [`HumanDuration`]: Format a `Duration` as H:M:S
+//! - [`HumanRelative`]: Show how long ago (or until) a timestamp is
 //! - [`HumanPercent`]: Round and format floating-point numbers as percentages
 //!
 //! ## Output formats
 //!
-//! Each type provides `.concise()` and `.full()` methods for different output styles:
+//! Each type provides `.short()` and `.long()` methods. They return a
+//! [`HumanDisplay`] view that implements [`Display`](std::fmt::Display) and
+//! formats directly into the writer — `println!`/`write!` allocate nothing.
+//! Call `.to_string()` when you want an owned `String`.
 //!
 //! ```rust
-//! use humanly::HumanNumber;
+//! use human::HumanNumber;
 //!
-//! // Concise: "1.8k"
-//! println!("{}", HumanNumber::from(1_800).concise());
+//! // Short: "1.8k" — printed with no intermediate String
+//! println!("{}", HumanNumber::new(1_800).short());
 //!
-//! // Full: "1.8 thousand"
-//! println!("{}", HumanNumber::from(1_800).full());
+//! // Long: "1.8 thousand"
+//! println!("{}", HumanNumber::new(1_800).long());
 //! ```
 //!
 //! ## Examples
 //!
 //! ```rust
-//! use humanly::{HumanNumber, HumanSize, HumanDuration, HumanTime, HumanPercent};
+//! use human::{HumanNumber, HumanSize, HumanDuration, HumanRelative, HumanPercent};
 //! use std::time::{Duration, SystemTime};
 //!
 //! // HumanNumber
-//! assert_eq!(HumanNumber::from(1_200).concise(), "1.2k");
-//! assert_eq!(HumanNumber::from(1_200).full(), "1.2 thousand");
-//! assert_eq!(HumanNumber::from(1_800_000).concise(), "1.8M");
-//! assert_eq!(HumanNumber::from(1_800_000).full(), "1.8 million");
-//! assert_eq!(HumanNumber::from(2_500_000_000.0).concise(), "2.5B");
-//! assert_eq!(HumanNumber::from(2_500_000_000.0).full(), "2.5 billion");
-//! assert_eq!(HumanNumber::from(3_700_000_000_000.0).concise(), "3.7T");
-//! assert_eq!(HumanNumber::from(3_700_000_000_000.0).full(), "3.7 trillion");
+//! assert_eq!(HumanNumber::new(1_200).short().to_string(), "1.2k");
+//! assert_eq!(HumanNumber::new(1_200).long().to_string(), "1.2 thousand");
+//! assert_eq!(HumanNumber::new(1_800_000).short().to_string(), "1.8M");
+//! assert_eq!(HumanNumber::new(1_800_000).long().to_string(), "1.8 million");
+//! assert_eq!(HumanNumber::new(2_500_000_000.0).short().to_string(), "2.5B");
+//! assert_eq!(HumanNumber::new(2_500_000_000.0).long().to_string(), "2.5 billion");
+//! assert_eq!(HumanNumber::new(3_700_000_000_000.0).short().to_string(), "3.7T");
+//! assert_eq!(HumanNumber::new(3_700_000_000_000.0).long().to_string(), "3.7 trillion");
 //!
 //! // HumanSize
 //! // Binary (default, 1024-based)
-//! assert_eq!(HumanSize::from(5_242_880).concise(), "5 MiB");
-//! assert_eq!(HumanSize::from(5_242_880).full(), "5 mebibytes");
+//! assert_eq!(HumanSize::new(5_242_880).short().to_string(), "5 MiB");
+//! assert_eq!(HumanSize::new(5_242_880).long().to_string(), "5 mebibytes");
 //!
 //! // Decimal (SI, 1000-based)
-//! let human_size = HumanSize::from(5_000_000);
-//! assert_eq!(human_size.decimal().concise(), "5 MB");
-//! assert_eq!(human_size.decimal().full(), "5 megabytes");
+//! let human_size = HumanSize::new(5_000_000);
+//! assert_eq!(human_size.decimal().short().to_string(), "5 MB");
+//! assert_eq!(human_size.decimal().long().to_string(), "5 megabytes");
 //!
 //! // Ensure chaining works
-//! let human_size_2 = HumanSize::from(1_000_000);
-//! assert_eq!(human_size_2.binary().concise(), "976.6 KiB");
-//! assert_eq!(human_size_2.binary().full(), "976.6 kibibytes");
+//! let human_size_2 = HumanSize::new(1_000_000);
+//! assert_eq!(human_size_2.binary().short().to_string(), "976.6 KiB");
+//! assert_eq!(human_size_2.binary().long().to_string(), "976.6 kibibytes");
 //!
-//! // HumanDuration
+//! // HumanRelative
 //! let now = SystemTime::now();
-//! let result = HumanDuration::from(Some(now - Duration::from_secs(75))).concise();
+//! let result = HumanRelative::new(now - Duration::from_secs(75)).short().to_string();
 //! assert!(result.contains("1m"));
 //!
-//! // HumanTime
-//! assert_eq!(HumanTime::from(Duration::from_secs(3661)).concise(), "1h 1m 1s");
-//! assert_eq!(HumanTime::from(Duration::from_secs(3661)).to_string(), "1 hour 1 minute 1 second");
+//! // HumanDuration
+//! assert_eq!(HumanDuration::new(Duration::from_secs(3661)).short().to_string(), "1h 1m 1s");
+//! assert_eq!(HumanDuration::new(Duration::from_secs(3661)).to_string(), "1 hour 1 minute 1 second");
 //!
 //! // HumanPercent
-//! assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
-//! assert_eq!(HumanPercent::from(12.3456, 1).to_string(), "12.3 percent");
+//! assert_eq!(HumanPercent::new(12.3456, 1).short().to_string(), "12.3%");
+//! assert_eq!(HumanPercent::new(12.3456, 1).to_string(), "12.3 percent");
 //! ```
 //!
 //! ## Crate modules
 //!
-//! - [`HumanNumber`] — Convert numbers to K/M/B/T notation (concise) or word format (full).
+//! - [`HumanNumber`] — Convert numbers to K/M/B/T notation (short) or word format (long).
 //! - [`HumanSize`] — Convert bytes to human-readable units (KiB, MiB…).
-//! - [`HumanDuration`] — Show how long ago a timestamp occurred in short or long format.
-//! - [`HumanTime`] — Convert `Duration` into H:M:S strings.
+//! - [`HumanDuration`] — Convert a `Duration` into H:M:S strings.
+//! - [`HumanRelative`] — Show how long ago (or until) a timestamp is, in short or long format.
 //! - [`HumanPercent`] — Round floats and display as percentage string.
 //!
 //! [`HumanNumber`]: struct.HumanNumber.html
 //! [`HumanSize`]: struct.HumanSize.html
 //! [`HumanDuration`]: struct.HumanDuration.html
-//! [`HumanTime`]: struct.HumanTime.html
+//! [`HumanRelative`]: struct.HumanRelative.html
 //! [`HumanPercent`]: struct.HumanPercent.html
+//! [`HumanDisplay`]: struct.HumanDisplay.html
 
-mod humanly;
-pub use humanly::HumanDuration;
-pub use humanly::HumanNumber;
-pub use humanly::HumanPercent;
-pub use humanly::HumanSize;
-pub use humanly::HumanTime;
-
-/// Adds two unsigned 64-bit integers together.
-///
-/// # Parameters
-///
-/// * `left` - The first operand.
-/// * `right` - The second operand.
-///
-/// # Returns
-///
-/// The sum of `left` and `right` as a `u64`.
-///
-/// # Examples
-///
-/// ```
-/// use humanly::add;
-///
-/// assert_eq!(add(2, 3), 5);
-/// ```
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+mod libhuman;
+pub use libhuman::HumanDisplay;
+pub use libhuman::HumanDuration;
+pub use libhuman::HumanNumber;
+pub use libhuman::HumanPercent;
+pub use libhuman::HumanRelative;
+pub use libhuman::HumanSize;
 
 #[cfg(test)]
 mod tests {
-    use crate::humanly::{HumanDuration, HumanNumber, HumanPercent, HumanSize, HumanTime};
+    use crate::libhuman::{
+        HumanDuration, HumanNumber, HumanPercent, HumanRelative, HumanSize,
+    };
     use std::time::{Duration, SystemTime};
 
     #[test]
     fn test_human_number() {
-        // Test full format (word format)
-        assert_eq!(HumanNumber::from(500).full(), "500");
-        assert_eq!(HumanNumber::from(1_000).full(), "1 thousand");
-        assert_eq!(HumanNumber::from(1_500).full(), "1.5 thousand");
-        assert_eq!(HumanNumber::from(1_700_700).full(), "1.7 million");
-        assert_eq!(HumanNumber::from(1_000_000).full(), "1 million");
-        assert_eq!(HumanNumber::from(1_500_000).full(), "1.5 million");
-        assert_eq!(HumanNumber::from(1_000_000_000).full(), "1 billion");
-        assert_eq!(HumanNumber::from(1_500_000_000).full(), "1.5 billion");
-        assert_eq!(HumanNumber::from(1_000_000_000_000.0).full(), "1 trillion");
-        assert_eq!(
-            HumanNumber::from(2_500_000_000_000.0).full(),
-            "2.5 trillion"
-        );
+        // Test long format (word format)
+        assert_eq!(HumanNumber::new(500).long().to_string(), "500");
+        assert_eq!(HumanNumber::new(1_000).long().to_string(), "1 thousand");
+        assert_eq!(HumanNumber::new(1_500).long().to_string(), "1.5 thousand");
+        assert_eq!(HumanNumber::new(1_700_700).long().to_string(), "1.7 million");
+        assert_eq!(HumanNumber::new(1_000_000).long().to_string(), "1 million");
+        assert_eq!(HumanNumber::new(1_500_000).long().to_string(), "1.5 million");
+        assert_eq!(HumanNumber::new(1_000_000_000).long().to_string(), "1 billion");
+        assert_eq!(HumanNumber::new(1_500_000_000).long().to_string(), "1.5 billion");
+        assert_eq!(HumanNumber::new(1_000_000_000_000.0).long().to_string(), "1 trillion");
+        assert_eq!(HumanNumber::new(2_500_000_000_000.0).long().to_string(), "2.5 trillion");
 
-        // Test concise format (k/M/B/T notation)
-        assert_eq!(HumanNumber::from(500).concise(), "500");
-        assert_eq!(HumanNumber::from(999).concise(), "999");
-        assert_eq!(HumanNumber::from(1_000).concise(), "1k");
-        assert_eq!(HumanNumber::from(1_500).concise(), "1.5k");
-        assert_eq!(HumanNumber::from(1_700_700).concise(), "1.7M");
-        assert_eq!(HumanNumber::from(1_000_000).concise(), "1M");
-        assert_eq!(HumanNumber::from(1_500_000).concise(), "1.5M");
-        assert_eq!(HumanNumber::from(1_000_000_000).concise(), "1B");
-        assert_eq!(HumanNumber::from(1_500_000_000).concise(), "1.5B");
-        assert_eq!(HumanNumber::from(1_000_000_000_000.0).concise(), "1T");
-        assert_eq!(HumanNumber::from(2_500_000_000_000.0).concise(), "2.5T");
+        // Test short format (k/M/B/T notation)
+        assert_eq!(HumanNumber::new(500).short().to_string(), "500");
+        assert_eq!(HumanNumber::new(999).short().to_string(), "999");
+        assert_eq!(HumanNumber::new(1_000).short().to_string(), "1k");
+        assert_eq!(HumanNumber::new(1_500).short().to_string(), "1.5k");
+        assert_eq!(HumanNumber::new(1_700_700).short().to_string(), "1.7M");
+        assert_eq!(HumanNumber::new(1_000_000).short().to_string(), "1M");
+        assert_eq!(HumanNumber::new(1_500_000).short().to_string(), "1.5M");
+        assert_eq!(HumanNumber::new(1_000_000_000).short().to_string(), "1B");
+        assert_eq!(HumanNumber::new(1_500_000_000).short().to_string(), "1.5B");
+        assert_eq!(HumanNumber::new(1_000_000_000_000.0).short().to_string(), "1T");
+        assert_eq!(HumanNumber::new(2_500_000_000_000.0).short().to_string(), "2.5T");
 
-        // Test Display trait (should use full format)
-        assert_eq!(HumanNumber::from(1_500).to_string(), "1.5 thousand");
-        assert_eq!(HumanNumber::from(1_500_000).to_string(), "1.5 million");
+        // Test Display trait (should use long format)
+        assert_eq!(HumanNumber::new(1_500).to_string(), "1.5 thousand");
+        assert_eq!(HumanNumber::new(1_500_000).to_string(), "1.5 million");
+
+        // From / Into for concrete numeric types
+        let via_into: HumanNumber = 1_500_i32.into();
+        assert_eq!(via_into.short().to_string(), "1.5k");
     }
 
     #[test]
     fn test_human_size() {
         // Binary (default)
-        assert_eq!(HumanSize::from(0).concise(), "0 B");
-        assert_eq!(HumanSize::from(1).concise(), "1 B");
-        assert_eq!(HumanSize::from(1).full(), "1 byte");
-        assert_eq!(HumanSize::from(500).concise(), "500 B");
-        assert_eq!(HumanSize::from(500).full(), "500 bytes");
-        assert_eq!(HumanSize::from(1023).concise(), "1023 B");
-        assert_eq!(HumanSize::from(1024).concise(), "1 KiB");
-        assert_eq!(HumanSize::from(1024).to_string(), "1 kibibyte");
-        assert_eq!(HumanSize::from(1_048_576).to_string(), "1 mebibyte");
-        assert_eq!(HumanSize::from(1_500_000).concise(), "1.4 MiB");
-        assert_eq!(HumanSize::from(1_073_741_824).to_string(), "1 gibibyte");
+        assert_eq!(HumanSize::new(0).short().to_string(), "0 B");
+        assert_eq!(HumanSize::new(1).short().to_string(), "1 B");
+        assert_eq!(HumanSize::new(1).long().to_string(), "1 byte");
+        assert_eq!(HumanSize::new(500).short().to_string(), "500 B");
+        assert_eq!(HumanSize::new(500).long().to_string(), "500 bytes");
+        assert_eq!(HumanSize::new(1023).short().to_string(), "1023 B");
+        assert_eq!(HumanSize::new(1024).short().to_string(), "1 KiB");
+        assert_eq!(HumanSize::new(1024).to_string(), "1 kibibyte");
+        assert_eq!(HumanSize::new(1_048_576).to_string(), "1 mebibyte");
+        assert_eq!(HumanSize::new(1_500_000).short().to_string(), "1.4 MiB");
+        assert_eq!(HumanSize::new(1_073_741_824).to_string(), "1 gibibyte");
 
         // Decimal (SI)
-        let hs = HumanSize::from(5_000_000);
-        assert_eq!(hs.decimal().concise(), "5 MB");
+        let hs = HumanSize::new(5_000_000);
+        assert_eq!(hs.decimal().short().to_string(), "5 MB");
         assert_eq!(hs.decimal().to_string(), "5 megabytes");
 
         // Ensure chaining works
-        let hs2 = HumanSize::from(1_000_000);
-        assert_eq!(hs2.binary().concise(), "976.6 KiB");
+        let hs2 = HumanSize::new(1_000_000);
+        assert_eq!(hs2.binary().short().to_string(), "976.6 KiB");
         assert_eq!(hs2.binary().to_string(), "976.6 kibibytes");
     }
 
     #[test]
-    fn test_human_duration() {
+    fn test_human_relative() {
         let now = SystemTime::now();
 
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(0))).to_string(),
+            HumanRelative::new(now - Duration::from_secs(0)).to_string(),
             "just now"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(45))).concise(),
+            HumanRelative::new(now - Duration::from_secs(45)).short().to_string(),
             "45s ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(120))).to_string(),
+            HumanRelative::new(now - Duration::from_secs(120)).to_string(),
             "2 minutes ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(7200))).to_string(),
+            HumanRelative::new(now - Duration::from_secs(7200)).to_string(),
             "2 hours ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(172_800))).concise(),
+            HumanRelative::new(now - Duration::from_secs(172_800)).short().to_string(),
             "2d ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(1_209_600))).concise(),
+            HumanRelative::new(now - Duration::from_secs(1_209_600)).short().to_string(),
             "2w ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(5_259_492))).to_string(),
+            HumanRelative::new(now - Duration::from_secs(5_259_492)).to_string(),
             "2 months ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(63_113_904))).concise(),
+            HumanRelative::new(now - Duration::from_secs(63_113_904)).short().to_string(),
             "2y ago"
         );
         assert_eq!(
-            HumanDuration::from(Some(now - Duration::from_secs(86_400))).to_string(),
+            HumanRelative::new(now - Duration::from_secs(86_400)).to_string(),
             "yesterday"
+        );
+
+        // Future timestamps: long format says "from now", not "ago"
+        assert_eq!(
+            HumanRelative::new(now + Duration::from_secs(150)).short().to_string(),
+            "2m from now"
+        );
+        assert_eq!(
+            HumanRelative::new(now + Duration::from_secs(150)).long().to_string(),
+            "2 minutes from now"
+        );
+        assert_eq!(
+            HumanRelative::new(now + Duration::from_secs(5400)).long().to_string(),
+            "1 hour from now"
+        );
+        assert_eq!(
+            HumanRelative::new(now + Duration::from_secs(90_000)).long().to_string(),
+            "tomorrow"
         );
     }
 
     #[test]
-    fn test_human_time() {
-        assert_eq!(HumanTime::from(Duration::from_secs(45)).concise(), "45s");
-        assert_eq!(HumanTime::from(Duration::from_secs(90)).concise(), "1m 30s");
+    fn test_human_duration() {
         assert_eq!(
-            HumanTime::from(Duration::from_secs(3672)).to_string(),
+            HumanDuration::new(Duration::from_secs(45)).short().to_string(),
+            "45s"
+        );
+        assert_eq!(
+            HumanDuration::new(Duration::from_secs(90)).short().to_string(),
+            "1m 30s"
+        );
+        assert_eq!(
+            HumanDuration::new(Duration::from_secs(3672)).to_string(),
             "1 hour 1 minute 12 seconds"
         );
     }
 
     #[test]
     fn test_human_percent() {
-        assert_eq!(HumanPercent::from(12.3456, 0).concise(), "12%");
-        assert_eq!(HumanPercent::from(12.3456, 1).concise(), "12.3%");
-        assert_eq!(HumanPercent::from(12.3456, 2).to_string(), "12.35 percent");
+        assert_eq!(HumanPercent::new(12.3456, 0).short().to_string(), "12%");
+        assert_eq!(HumanPercent::new(12.3456, 1).short().to_string(), "12.3%");
+        assert_eq!(HumanPercent::new(12.3456, 2).to_string(), "12.35 percent");
         assert_eq!(
-            HumanPercent::from(0.1234 * 100.0, 1).to_string(),
+            HumanPercent::new(0.1234 * 100.0, 1).to_string(),
             "12.3 percent"
         );
     }
