@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Security
 
+## [0.2.0] - 2026-07-15
+### Changed
+- Rename to _libhuman_ from _humanly_
+- Breaking API changes
+
 ## [0.1.5] - 2026-07-11
 ### Changed
 - Show bytes with a 'B' suffix
