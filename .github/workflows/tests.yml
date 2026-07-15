@@ -1,0 +1,22 @@
+name: Scheduled Tests
+
+on:
+  schedule:
+    # Midnight CAT (Central Africa Time, UTC+2) = 22:00 UTC. Cron runs in UTC.
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
